@@ -1,0 +1,45 @@
+/// Una celda del tablero (plan §6.4).
+///
+/// Modelo mutable: el engine cambia [isRevealed]/[isFlagged] durante la
+/// partida. La posición ([row]/[col]) y la presencia de mina son fijas una vez
+/// generado el tablero.
+class Cell {
+  Cell({
+    required this.row,
+    required this.col,
+    this.hasMine = false,
+    this.isRevealed = false,
+    this.isFlagged = false,
+    this.adjacentMines = 0,
+    this.displayedNumber,
+    this.isLiar = false,
+    this.minedBelow = false,
+  });
+
+  final int row;
+  final int col;
+
+  bool hasMine;
+  bool isRevealed;
+  bool isFlagged;
+
+  /// Número real de minas adyacentes (0–8 en clásico).
+  int adjacentMines;
+
+  /// Número mostrado al jugador. Difiere de [adjacentMines] en modo Mentiroso
+  /// (plan §2.4). En clásico es `null` y la UI usa [adjacentMines].
+  int? displayedNumber;
+
+  /// Modo Mentiroso: esta celda muestra un valor falso.
+  bool isLiar;
+
+  /// Modo 3D: la mina contada por esta celda está en la capa inferior
+  /// (plan §2.6).
+  bool minedBelow;
+
+  /// Número que la UI debe pintar: el mostrado si existe, si no el real.
+  int get shownNumber => displayedNumber ?? adjacentMines;
+
+  /// `true` si es una celda vacía (sin minas alrededor) ya destapada.
+  bool get isEmpty => !hasMine && adjacentMines == 0;
+}

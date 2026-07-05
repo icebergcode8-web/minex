@@ -1,0 +1,11 @@
+{
+  "@@locale": "es",
+  "appTitle": "Minex",
+  "@appTitle": {
+    "description": "Nombre de la aplicación"
+  },
+  "play": "JUGAR",
+  "@play": {
+    "description": "Botón principal para empezar a jugar"
+  }
+}
