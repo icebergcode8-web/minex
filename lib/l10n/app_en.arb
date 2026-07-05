@@ -1,5 +1,89 @@
 {
   "@@locale": "en",
   "appTitle": "Minex",
-  "play": "PLAY"
+  "appTagline": "Retro-modern minesweeper",
+  "play": "PLAY",
+
+  "modesTitle": "Choose a mode",
+  "modeClassic": "Classic",
+  "modeClassicDesc": "The minesweeper you know, polished.",
+  "modeFog": "Fog",
+  "modeFogDesc": "You only see what's near you.",
+  "modeBlitz": "Blitz",
+  "modeBlitzDesc": "Race against the clock.",
+  "modeLiar": "Liar",
+  "modeLiarDesc": "Some numbers lie.",
+  "modeWaves": "Waves",
+  "modeWavesDesc": "Survive wave after wave.",
+  "modeTower": "3D Tower",
+  "modeTowerDesc": "Layered minesweeper.",
+  "modeDaily": "Daily Challenge",
+  "modeDailyDesc": "A fresh board every day.",
+  "comingSoon": "Coming soon",
+
+  "classicMode": "Classic Mode",
+  "difficultyEasy": "Easy",
+  "difficultyMedium": "Medium",
+  "difficultyHard": "Hard",
+  "difficultyExpert": "Expert",
+  "boardSummary": "{rows}×{cols} · {mines} mines",
+  "@boardSummary": {
+    "placeholders": {
+      "rows": { "type": "int" },
+      "cols": { "type": "int" },
+      "mines": { "type": "int" }
+    }
+  },
+  "bestLabel": "Best",
+  "noRecord": "— —",
+
+  "reveal": "Reveal",
+  "flag": "Flag",
+
+  "pauseTitle": "Paused",
+  "resume": "Resume",
+  "restart": "Restart",
+  "exit": "Exit",
+  "menu": "Menu",
+
+  "victory": "Victory!",
+  "defeat": "Boom 💥",
+  "timeLabel": "Time",
+  "newRecord": "NEW RECORD!",
+  "youHitMine": "You hit a mine",
+  "playAgain": "Play again",
+  "retry": "Retry",
+
+  "statsTitle": "Statistics",
+  "statsPlayed": "Played",
+  "statsWins": "Wins",
+  "statsWinrate": "Win rate",
+  "statsBestTime": "Best time",
+  "statsEmpty": "No games yet.\nPlay one and come back!",
+  "winratePercent": "{value}%",
+  "@winratePercent": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "settingsTitle": "Settings",
+  "settingsAudio": "Audio",
+  "settingsSound": "Sound effects",
+  "settingsMusic": "Music",
+  "settingsGameplay": "Gameplay",
+  "settingsVibration": "Vibration",
+  "settingsInvertControls": "Invert tap / flag",
+  "settingsInvertControlsDesc": "Tap to flag; long-press to reveal.",
+  "settingsAppearance": "Appearance",
+  "settingsTheme": "Theme",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsLanguage": "Language",
+  "settingsAbout": "About",
+  "settingsVersion": "Version",
+
+  "navStats": "Statistics",
+  "navSettings": "Settings"
 }

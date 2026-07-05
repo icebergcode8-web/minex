@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/game_provider.dart';
 
 /// HUD superior de la partida (plan §8.4): pausa, contador de minas y
@@ -16,6 +18,7 @@ class GameTopHud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gp = context.watch<GameProvider>();
+    final palette = context.palette;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
@@ -24,7 +27,7 @@ class GameTopHud extends StatelessWidget {
           const Spacer(),
           _HudChip(
             icon: Icons.flag,
-            color: AppColors.danger,
+            color: palette.danger,
             label: '${gp.minesRemaining}',
           ),
           const SizedBox(width: 10),
@@ -32,7 +35,7 @@ class GameTopHud extends StatelessWidget {
             valueListenable: gp.elapsed,
             builder: (_, value, child) => _HudChip(
               icon: Icons.timer_outlined,
-              color: AppColors.primary,
+              color: palette.primary,
               label: formatClock(value),
               monospace: true,
             ),
@@ -53,7 +56,10 @@ class GameActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gp = context.watch<GameProvider>();
+    final palette = context.palette;
+    final l = AppLocalizations.of(context)!;
     final flagMode = gp.flagMode;
+    final accent = flagMode ? palette.secondary : palette.primary;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
       child: Row(
@@ -62,17 +68,21 @@ class GameActionBar extends StatelessWidget {
           GestureDetector(
             onTap: gp.toggleFlagMode,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               decoration: BoxDecoration(
-                color: flagMode
-                    ? AppColors.secondary.withValues(alpha: 0.18)
-                    : AppColors.hiddenCell,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: flagMode ? AppColors.secondary : AppColors.hiddenCellHighlight,
-                  width: 2,
-                ),
+                color: accent.withValues(alpha: flagMode ? 0.16 : 0.12),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: accent, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.22),
+                    blurRadius: 16,
+                    spreadRadius: -6,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -81,10 +91,11 @@ class GameActionBar extends StatelessWidget {
                       style: const TextStyle(fontSize: 22)),
                   const SizedBox(width: 10),
                   Text(
-                    flagMode ? 'Bandera' : 'Revelar',
+                    flagMode ? l.flag : l.reveal,
                     style: TextStyle(
-                      color: flagMode ? AppColors.secondary : AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
+                      color: accent,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
                     ),
                   ),
                 ],
@@ -112,11 +123,13 @@ class _HudChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.hiddenCell,
-        borderRadius: BorderRadius.circular(12),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -125,13 +138,16 @@ class _HudChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
-              fontFeatures: monospace
-                  ? const [FontFeature.tabularFigures()]
-                  : null,
-            ),
+            style: monospace
+                ? AppTheme.mono(
+                    fontSize: 15,
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  )
+                : TextStyle(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
           ),
         ],
       ),
@@ -147,15 +163,16 @@ class _HudButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Material(
-      color: AppColors.hiddenCell,
-      borderRadius: BorderRadius.circular(12),
+      color: palette.surface,
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, color: AppColors.textPrimary, size: 22),
+          padding: const EdgeInsets.all(9),
+          child: Icon(icon, color: palette.textPrimary, size: 22),
         ),
       ),
     );

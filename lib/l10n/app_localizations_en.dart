@@ -12,5 +12,201 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Minex';
 
   @override
+  String get appTagline => 'Retro-modern minesweeper';
+
+  @override
   String get play => 'PLAY';
+
+  @override
+  String get modesTitle => 'Choose a mode';
+
+  @override
+  String get modeClassic => 'Classic';
+
+  @override
+  String get modeClassicDesc => 'The minesweeper you know, polished.';
+
+  @override
+  String get modeFog => 'Fog';
+
+  @override
+  String get modeFogDesc => 'You only see what\'s near you.';
+
+  @override
+  String get modeBlitz => 'Blitz';
+
+  @override
+  String get modeBlitzDesc => 'Race against the clock.';
+
+  @override
+  String get modeLiar => 'Liar';
+
+  @override
+  String get modeLiarDesc => 'Some numbers lie.';
+
+  @override
+  String get modeWaves => 'Waves';
+
+  @override
+  String get modeWavesDesc => 'Survive wave after wave.';
+
+  @override
+  String get modeTower => '3D Tower';
+
+  @override
+  String get modeTowerDesc => 'Layered minesweeper.';
+
+  @override
+  String get modeDaily => 'Daily Challenge';
+
+  @override
+  String get modeDailyDesc => 'A fresh board every day.';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get classicMode => 'Classic Mode';
+
+  @override
+  String get difficultyEasy => 'Easy';
+
+  @override
+  String get difficultyMedium => 'Medium';
+
+  @override
+  String get difficultyHard => 'Hard';
+
+  @override
+  String get difficultyExpert => 'Expert';
+
+  @override
+  String boardSummary(int rows, int cols, int mines) {
+    return '$rows×$cols · $mines mines';
+  }
+
+  @override
+  String get bestLabel => 'Best';
+
+  @override
+  String get noRecord => '— —';
+
+  @override
+  String get reveal => 'Reveal';
+
+  @override
+  String get flag => 'Flag';
+
+  @override
+  String get pauseTitle => 'Paused';
+
+  @override
+  String get resume => 'Resume';
+
+  @override
+  String get restart => 'Restart';
+
+  @override
+  String get exit => 'Exit';
+
+  @override
+  String get menu => 'Menu';
+
+  @override
+  String get victory => 'Victory!';
+
+  @override
+  String get defeat => 'Boom 💥';
+
+  @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get newRecord => 'NEW RECORD!';
+
+  @override
+  String get youHitMine => 'You hit a mine';
+
+  @override
+  String get playAgain => 'Play again';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get statsTitle => 'Statistics';
+
+  @override
+  String get statsPlayed => 'Played';
+
+  @override
+  String get statsWins => 'Wins';
+
+  @override
+  String get statsWinrate => 'Win rate';
+
+  @override
+  String get statsBestTime => 'Best time';
+
+  @override
+  String get statsEmpty => 'No games yet.\nPlay one and come back!';
+
+  @override
+  String winratePercent(int value) {
+    return '$value%';
+  }
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsAudio => 'Audio';
+
+  @override
+  String get settingsSound => 'Sound effects';
+
+  @override
+  String get settingsMusic => 'Music';
+
+  @override
+  String get settingsGameplay => 'Gameplay';
+
+  @override
+  String get settingsVibration => 'Vibration';
+
+  @override
+  String get settingsInvertControls => 'Invert tap / flag';
+
+  @override
+  String get settingsInvertControlsDesc => 'Tap to flag; long-press to reveal.';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String get settingsVersion => 'Version';
+
+  @override
+  String get navStats => 'Statistics';
+
+  @override
+  String get navSettings => 'Settings';
 }

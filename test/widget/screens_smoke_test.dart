@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'package:minex/core/audio/audio_service.dart';
 import 'package:minex/core/constants/difficulty.dart';
 import 'package:minex/core/constants/routes.dart';
+import 'package:minex/core/haptics/haptics_service.dart';
 import 'package:minex/data/local/hive_service.dart';
 import 'package:minex/data/repositories/records_repository.dart';
 import 'package:minex/data/repositories/settings_repository.dart';
+import 'package:minex/l10n/app_localizations.dart';
 import 'package:minex/ui/screens/difficulty_select_screen.dart';
 import 'package:minex/ui/screens/game_screen.dart';
 
@@ -37,8 +40,15 @@ Widget _wrap(Widget child) => MultiProvider(
       providers: [
         Provider<RecordsRepository>.value(value: FakeRecordsRepository()),
         Provider<SettingsRepository>.value(value: FakeSettingsRepository()),
+        Provider<AudioService>.value(value: AudioService()),
+        Provider<HapticsService>.value(value: HapticsService()),
       ],
-      child: MaterialApp(home: child),
+      child: MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: child,
+      ),
     );
 
 void main() {

@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
+import 'core/audio/audio_service.dart';
+import 'core/haptics/haptics_service.dart';
 import 'data/local/hive_service.dart';
 import 'data/repositories/records_repository.dart';
 import 'data/repositories/settings_repository.dart';
+import 'providers/settings_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,12 +25,25 @@ Future<void> main() async {
   final hive = HiveService();
   await hive.init();
 
+  final settingsRepo = SettingsRepository(hive);
+  final audio = AudioService();
+  final haptics = HapticsService();
+
   runApp(
     MultiProvider(
       providers: [
         Provider<HiveService>.value(value: hive),
-        Provider<SettingsRepository>(create: (_) => SettingsRepository(hive)),
+        Provider<SettingsRepository>.value(value: settingsRepo),
         Provider<RecordsRepository>(create: (_) => RecordsRepository(hive)),
+        Provider<AudioService>.value(value: audio),
+        Provider<HapticsService>.value(value: haptics),
+        ChangeNotifierProvider<SettingsProvider>(
+          create: (_) => SettingsProvider(
+            repo: settingsRepo,
+            audio: audio,
+            haptics: haptics,
+          ),
+        ),
       ],
       child: const MinexApp(),
     ),

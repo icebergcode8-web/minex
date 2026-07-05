@@ -9,6 +9,7 @@ import '../../providers/game_provider.dart';
 import '../overlays/pause_overlay.dart';
 import '../overlays/result_overlay.dart';
 import '../widgets/board/board_widget.dart';
+import '../widgets/common/app_background.dart';
 import '../widgets/hud/game_hud.dart';
 
 /// Pantalla de partida (plan §8.4). Crea el [GameProvider] scoped: se destruye
@@ -52,7 +53,8 @@ class _GameView extends StatelessWidget {
         }
       },
       child: Scaffold(
-        body: SafeArea(
+        body: AppBackground(
+          child: SafeArea(
           child: Stack(
             children: [
               Column(
@@ -82,6 +84,7 @@ class _GameView extends StatelessWidget {
                   onExit: () => Navigator.of(context).pop(),
                 ),
             ],
+          ),
           ),
         ),
       ),

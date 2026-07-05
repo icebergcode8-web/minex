@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/constants/difficulty.dart';
 import '../../core/constants/routes.dart';
+import '../../core/theme/app_palette.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/repositories/records_repository.dart';
+import '../../l10n/app_localizations.dart';
+import '../widgets/common/app_background.dart';
+import '../widgets/common/app_card.dart';
 
-/// Selección de dificultad del modo clásico (plan §4.1). En Fase 1 es el punto
-/// de entrada al juego; en Fase 2 se antepone el ModeSelect.
+/// Selección de dificultad del modo clásico (plan §4.1). Se llega desde
+/// ModeSelect; abre la partida.
 class DifficultySelectScreen extends StatelessWidget {
   const DifficultySelectScreen({super.key});
 
@@ -19,40 +23,44 @@ class DifficultySelectScreen extends StatelessWidget {
     Difficulty.expert,
   ];
 
-  static const _labels = {
-    Difficulty.easy: 'Fácil',
-    Difficulty.medium: 'Medio',
-    Difficulty.hard: 'Difícil',
-    Difficulty.expert: 'Experto',
-  };
+  String _label(AppLocalizations l, Difficulty d) => switch (d) {
+        Difficulty.easy => l.difficultyEasy,
+        Difficulty.medium => l.difficultyMedium,
+        Difficulty.hard => l.difficultyHard,
+        Difficulty.expert => l.difficultyExpert,
+        Difficulty.custom => l.difficultyExpert,
+      };
 
   @override
   Widget build(BuildContext context) {
     final records = context.read<RecordsRepository>();
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Modo Clásico'),
-        backgroundColor: Colors.transparent,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          for (final d in _order)
-            _DifficultyCard(
-              label: _labels[d]!,
-              preset: kDifficultyPresets[d]!,
-              bestTimeMs: records.bestTimeMs(d),
-              onTap: () {
-                Navigator.of(context).pushNamed(
-                  Routes.game,
-                  arguments: GameArgs(
-                    config: classicConfig(d),
-                    difficulty: d,
-                  ),
-                );
-              },
-            ),
-        ],
+      appBar: AppBar(title: Text(l.classicMode)),
+      body: AppBackground(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            for (final d in _order)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _DifficultyCard(
+                  label: _label(l, d),
+                  preset: kDifficultyPresets[d]!,
+                  bestTimeMs: records.bestTimeMs(d),
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      Routes.game,
+                      arguments: GameArgs(
+                        config: classicConfig(d),
+                        difficulty: d,
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -73,56 +81,45 @@ class _DifficultyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: AppColors.hiddenCell,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                        )),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${preset.rows}×${preset.cols}  ·  ${preset.mines} minas',
-                      style: const TextStyle(color: AppColors.textMuted),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Icon(Icons.chevron_right, color: AppColors.primary),
-                    const SizedBox(height: 6),
-                    Text(
-                      bestTimeMs != null
-                          ? '🏆 ${formatRecord(bestTimeMs!)}'
-                          : '— —',
-                      style: const TextStyle(
-                        color: AppColors.secondary,
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    final palette = context.palette;
+    final l = AppLocalizations.of(context)!;
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: TextStyle(
+                    color: palette.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  )),
+              const SizedBox(height: 4),
+              Text(
+                l.boardSummary(preset.rows, preset.cols, preset.mines),
+                style: TextStyle(color: palette.textMuted),
+              ),
+            ],
           ),
-        ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Icon(Icons.chevron_right_rounded, color: palette.primary),
+              const SizedBox(height: 6),
+              Text(
+                bestTimeMs != null ? '🏆 ${formatRecord(bestTimeMs!)}' : l.noRecord,
+                style: AppTheme.mono(
+                  fontSize: 14,
+                  color: palette.secondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

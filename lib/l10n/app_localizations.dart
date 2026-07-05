@@ -104,11 +104,395 @@ abstract class AppLocalizations {
   /// **'Minex'**
   String get appTitle;
 
+  /// Eslogan bajo el logo
+  ///
+  /// In es, this message translates to:
+  /// **'Buscaminas retro moderno'**
+  String get appTagline;
+
   /// Botón principal para empezar a jugar
   ///
   /// In es, this message translates to:
   /// **'JUGAR'**
   String get play;
+
+  /// No description provided for @modesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige un modo'**
+  String get modesTitle;
+
+  /// No description provided for @modeClassic.
+  ///
+  /// In es, this message translates to:
+  /// **'Clásico'**
+  String get modeClassic;
+
+  /// No description provided for @modeClassicDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'El buscaminas de siempre, pulido.'**
+  String get modeClassicDesc;
+
+  /// No description provided for @modeFog.
+  ///
+  /// In es, this message translates to:
+  /// **'Niebla'**
+  String get modeFog;
+
+  /// No description provided for @modeFogDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo ves lo que tienes cerca.'**
+  String get modeFogDesc;
+
+  /// No description provided for @modeBlitz.
+  ///
+  /// In es, this message translates to:
+  /// **'Contrarreloj'**
+  String get modeBlitz;
+
+  /// No description provided for @modeBlitzDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Resuelve contra el cronómetro.'**
+  String get modeBlitzDesc;
+
+  /// No description provided for @modeLiar.
+  ///
+  /// In es, this message translates to:
+  /// **'Mentiroso'**
+  String get modeLiar;
+
+  /// No description provided for @modeLiarDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Algunos números mienten.'**
+  String get modeLiarDesc;
+
+  /// No description provided for @modeWaves.
+  ///
+  /// In es, this message translates to:
+  /// **'Oleadas'**
+  String get modeWaves;
+
+  /// No description provided for @modeWavesDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobrevive oleada tras oleada.'**
+  String get modeWavesDesc;
+
+  /// No description provided for @modeTower.
+  ///
+  /// In es, this message translates to:
+  /// **'Torre 3D'**
+  String get modeTower;
+
+  /// No description provided for @modeTowerDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscaminas por capas.'**
+  String get modeTowerDesc;
+
+  /// No description provided for @modeDaily.
+  ///
+  /// In es, this message translates to:
+  /// **'Reto Diario'**
+  String get modeDaily;
+
+  /// No description provided for @modeDailyDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Un tablero nuevo cada día.'**
+  String get modeDailyDesc;
+
+  /// Etiqueta en modos aún no disponibles
+  ///
+  /// In es, this message translates to:
+  /// **'Próximamente'**
+  String get comingSoon;
+
+  /// No description provided for @classicMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo Clásico'**
+  String get classicMode;
+
+  /// No description provided for @difficultyEasy.
+  ///
+  /// In es, this message translates to:
+  /// **'Fácil'**
+  String get difficultyEasy;
+
+  /// No description provided for @difficultyMedium.
+  ///
+  /// In es, this message translates to:
+  /// **'Medio'**
+  String get difficultyMedium;
+
+  /// No description provided for @difficultyHard.
+  ///
+  /// In es, this message translates to:
+  /// **'Difícil'**
+  String get difficultyHard;
+
+  /// No description provided for @difficultyExpert.
+  ///
+  /// In es, this message translates to:
+  /// **'Experto'**
+  String get difficultyExpert;
+
+  /// Resumen de tamaño de tablero y minas
+  ///
+  /// In es, this message translates to:
+  /// **'{rows}×{cols} · {mines} minas'**
+  String boardSummary(int rows, int cols, int mines);
+
+  /// No description provided for @bestLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor'**
+  String get bestLabel;
+
+  /// No description provided for @noRecord.
+  ///
+  /// In es, this message translates to:
+  /// **'— —'**
+  String get noRecord;
+
+  /// No description provided for @reveal.
+  ///
+  /// In es, this message translates to:
+  /// **'Revelar'**
+  String get reveal;
+
+  /// No description provided for @flag.
+  ///
+  /// In es, this message translates to:
+  /// **'Bandera'**
+  String get flag;
+
+  /// No description provided for @pauseTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausa'**
+  String get pauseTitle;
+
+  /// No description provided for @resume.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get resume;
+
+  /// No description provided for @restart.
+  ///
+  /// In es, this message translates to:
+  /// **'Reiniciar'**
+  String get restart;
+
+  /// No description provided for @exit.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir'**
+  String get exit;
+
+  /// No description provided for @menu.
+  ///
+  /// In es, this message translates to:
+  /// **'Menú'**
+  String get menu;
+
+  /// No description provided for @victory.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Victoria!'**
+  String get victory;
+
+  /// No description provided for @defeat.
+  ///
+  /// In es, this message translates to:
+  /// **'Boom 💥'**
+  String get defeat;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo'**
+  String get timeLabel;
+
+  /// No description provided for @newRecord.
+  ///
+  /// In es, this message translates to:
+  /// **'¡NUEVO RÉCORD!'**
+  String get newRecord;
+
+  /// No description provided for @youHitMine.
+  ///
+  /// In es, this message translates to:
+  /// **'Tocaste una mina'**
+  String get youHitMine;
+
+  /// No description provided for @playAgain.
+  ///
+  /// In es, this message translates to:
+  /// **'Jugar de nuevo'**
+  String get playAgain;
+
+  /// No description provided for @retry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get retry;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Estadísticas'**
+  String get statsTitle;
+
+  /// No description provided for @statsPlayed.
+  ///
+  /// In es, this message translates to:
+  /// **'Partidas'**
+  String get statsPlayed;
+
+  /// No description provided for @statsWins.
+  ///
+  /// In es, this message translates to:
+  /// **'Victorias'**
+  String get statsWins;
+
+  /// No description provided for @statsWinrate.
+  ///
+  /// In es, this message translates to:
+  /// **'Winrate'**
+  String get statsWinrate;
+
+  /// No description provided for @statsBestTime.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor tiempo'**
+  String get statsBestTime;
+
+  /// No description provided for @statsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay partidas.\n¡Juega una y vuelve!'**
+  String get statsEmpty;
+
+  /// No description provided for @winratePercent.
+  ///
+  /// In es, this message translates to:
+  /// **'{value}%'**
+  String winratePercent(int value);
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsAudio.
+  ///
+  /// In es, this message translates to:
+  /// **'Audio'**
+  String get settingsAudio;
+
+  /// No description provided for @settingsSound.
+  ///
+  /// In es, this message translates to:
+  /// **'Efectos de sonido'**
+  String get settingsSound;
+
+  /// No description provided for @settingsMusic.
+  ///
+  /// In es, this message translates to:
+  /// **'Música'**
+  String get settingsMusic;
+
+  /// No description provided for @settingsGameplay.
+  ///
+  /// In es, this message translates to:
+  /// **'Juego'**
+  String get settingsGameplay;
+
+  /// No description provided for @settingsVibration.
+  ///
+  /// In es, this message translates to:
+  /// **'Vibración'**
+  String get settingsVibration;
+
+  /// No description provided for @settingsInvertControls.
+  ///
+  /// In es, this message translates to:
+  /// **'Invertir toque / bandera'**
+  String get settingsInvertControls;
+
+  /// No description provided for @settingsInvertControlsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para poner bandera; mantén para revelar.'**
+  String get settingsInvertControlsDesc;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In es, this message translates to:
+  /// **'Apariencia'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsTheme.
+  ///
+  /// In es, this message translates to:
+  /// **'Tema'**
+  String get settingsTheme;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In es, this message translates to:
+  /// **'Sistema'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In es, this message translates to:
+  /// **'Claro'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In es, this message translates to:
+  /// **'Oscuro'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In es, this message translates to:
+  /// **'Idioma'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In es, this message translates to:
+  /// **'Acerca de'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión'**
+  String get settingsVersion;
+
+  /// No description provided for @navStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Estadísticas'**
+  String get navStats;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get navSettings;
 }
 
 class _AppLocalizationsDelegate

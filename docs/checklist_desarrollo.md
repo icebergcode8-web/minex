@@ -26,13 +26,14 @@
 - [x] Animaciones firma: **cascada de flood fill en ondas** (delay BFS 18ms) + **explosión de mina** (shake + onda expansiva)
 - [x] HomeScreen básico y navegación a partida (Navigator 1.0 + `onGenerateRoute` + transiciones custom)
 
-## ✨ Fase 2 — Juice + estructura
-- [ ] Resto de animaciones §5.2 (flip de celda, bandera con bounce, victoria/confeti)
-- [ ] `AudioService` (audioplayers) + `HapticsService`
-- [ ] Temas claro/oscuro/sistema + tipografías (Nunito + mono)
-- [ ] Navegación completa (Navigator 1.0 + `onGenerateRoute`, `PageRouteBuilder`, `PopScope` en GameScreen)
-- [ ] Pantallas: ModeSelect (carrusel), Stats (CustomPaint), Settings
-- [ ] Localización completa de todos los strings
+## ✨ Fase 2 — Juice + estructura ✅
+- [x] Resto de animaciones §5.2 (flip de celda, bandera con bounce, victoria/confeti) — en `board_widget.dart` (flip real + bounce + wave de victoria) y `effects/confetti.dart`
+- [x] `AudioService` (audioplayers) + `HapticsService` — háptica cableada a revelar/bandera/explosión/victoria. _AudioService listo y tolerante; faltan los `.mp3` en `assets/audio/` (no-op silencioso mientras tanto)_
+- [x] Temas claro/oscuro/sistema + tipografías (Nunito + mono) — `BoardPalette` (ThemeExtension) + `AppTheme`, conmutable en Ajustes. _Nota: google_fonts descarga en runtime; considerar bundlear las fuentes para 100% offline_
+- [x] Navegación completa (Navigator 1.0 + `onGenerateRoute`, `PageRouteBuilder`, `PopScope` en GameScreen)
+- [x] Pantallas: ModeSelect (carrusel), Stats (CustomPaint), Settings
+- [x] Localización completa de todos los strings (es/en)
+- [ ] _Pendiente arrastrado de F1:_ UI de dificultad **Personalizada** (el `GameConfig` ya existe)
 
 ## 💰 Fase 3 — Ads
 - [ ] `ad_config.dart` con switch test/prod y doble candado (`kReleaseMode`)

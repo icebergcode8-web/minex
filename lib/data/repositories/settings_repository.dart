@@ -11,7 +11,7 @@ class SettingsRepository {
   static const _kSound = 'sound';
   static const _kMusic = 'music';
   static const _kVibration = 'vibration';
-  static const _kDarkTheme = 'darkTheme';
+  static const _kThemeMode = 'themeMode';
   static const _kLocale = 'locale';
   static const _kInvertControls = 'invertControls';
 
@@ -25,8 +25,10 @@ class SettingsRepository {
       _hive.settings.get(_kVibration, defaultValue: true);
   set vibrationEnabled(bool v) => _hive.settings.put(_kVibration, v);
 
-  bool get darkTheme => _hive.settings.get(_kDarkTheme, defaultValue: true);
-  set darkTheme(bool v) => _hive.settings.put(_kDarkTheme, v);
+  /// Modo de tema: 'system' (default), 'light' o 'dark' (plan §8.5).
+  String get themeMode =>
+      _hive.settings.get(_kThemeMode, defaultValue: 'system');
+  set themeMode(String v) => _hive.settings.put(_kThemeMode, v);
 
   /// Código de idioma: 'es' (default) o 'en'.
   String get localeCode => _hive.settings.get(_kLocale, defaultValue: 'es');

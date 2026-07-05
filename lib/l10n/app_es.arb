@@ -4,8 +4,99 @@
   "@appTitle": {
     "description": "Nombre de la aplicación"
   },
+  "appTagline": "Buscaminas retro moderno",
+  "@appTagline": {
+    "description": "Eslogan bajo el logo"
+  },
   "play": "JUGAR",
   "@play": {
     "description": "Botón principal para empezar a jugar"
-  }
+  },
+
+  "modesTitle": "Elige un modo",
+  "modeClassic": "Clásico",
+  "modeClassicDesc": "El buscaminas de siempre, pulido.",
+  "modeFog": "Niebla",
+  "modeFogDesc": "Solo ves lo que tienes cerca.",
+  "modeBlitz": "Contrarreloj",
+  "modeBlitzDesc": "Resuelve contra el cronómetro.",
+  "modeLiar": "Mentiroso",
+  "modeLiarDesc": "Algunos números mienten.",
+  "modeWaves": "Oleadas",
+  "modeWavesDesc": "Sobrevive oleada tras oleada.",
+  "modeTower": "Torre 3D",
+  "modeTowerDesc": "Buscaminas por capas.",
+  "modeDaily": "Reto Diario",
+  "modeDailyDesc": "Un tablero nuevo cada día.",
+  "comingSoon": "Próximamente",
+  "@comingSoon": {
+    "description": "Etiqueta en modos aún no disponibles"
+  },
+
+  "classicMode": "Modo Clásico",
+  "difficultyEasy": "Fácil",
+  "difficultyMedium": "Medio",
+  "difficultyHard": "Difícil",
+  "difficultyExpert": "Experto",
+  "boardSummary": "{rows}×{cols} · {mines} minas",
+  "@boardSummary": {
+    "description": "Resumen de tamaño de tablero y minas",
+    "placeholders": {
+      "rows": { "type": "int" },
+      "cols": { "type": "int" },
+      "mines": { "type": "int" }
+    }
+  },
+  "bestLabel": "Mejor",
+  "noRecord": "— —",
+
+  "reveal": "Revelar",
+  "flag": "Bandera",
+
+  "pauseTitle": "Pausa",
+  "resume": "Continuar",
+  "restart": "Reiniciar",
+  "exit": "Salir",
+  "menu": "Menú",
+
+  "victory": "¡Victoria!",
+  "defeat": "Boom 💥",
+  "timeLabel": "Tiempo",
+  "newRecord": "¡NUEVO RÉCORD!",
+  "youHitMine": "Tocaste una mina",
+  "playAgain": "Jugar de nuevo",
+  "retry": "Reintentar",
+
+  "statsTitle": "Estadísticas",
+  "statsPlayed": "Partidas",
+  "statsWins": "Victorias",
+  "statsWinrate": "Winrate",
+  "statsBestTime": "Mejor tiempo",
+  "statsEmpty": "Aún no hay partidas.\n¡Juega una y vuelve!",
+  "winratePercent": "{value}%",
+  "@winratePercent": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "settingsTitle": "Ajustes",
+  "settingsAudio": "Audio",
+  "settingsSound": "Efectos de sonido",
+  "settingsMusic": "Música",
+  "settingsGameplay": "Juego",
+  "settingsVibration": "Vibración",
+  "settingsInvertControls": "Invertir toque / bandera",
+  "settingsInvertControlsDesc": "Toca para poner bandera; mantén para revelar.",
+  "settingsAppearance": "Apariencia",
+  "settingsTheme": "Tema",
+  "settingsThemeSystem": "Sistema",
+  "settingsThemeLight": "Claro",
+  "settingsThemeDark": "Oscuro",
+  "settingsLanguage": "Idioma",
+  "settingsAbout": "Acerca de",
+  "settingsVersion": "Versión",
+
+  "navStats": "Estadísticas",
+  "navSettings": "Ajustes"
 }

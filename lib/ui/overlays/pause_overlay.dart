@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/theme/app_palette.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/common/primary_button.dart';
 
 /// Overlay de pausa (plan §4.1). Resume / Reiniciar / Salir.
@@ -18,31 +19,33 @@ class PauseOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    final l = AppLocalizations.of(context)!;
     return _OverlayScrim(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Pausa',
+          Text(l.pauseTitle,
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: palette.textPrimary,
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
               )),
           const SizedBox(height: 24),
           PrimaryButton(
-              label: 'Continuar', icon: Icons.play_arrow, onPressed: onResume),
+              label: l.resume, icon: Icons.play_arrow, onPressed: onResume),
           const SizedBox(height: 12),
           PrimaryButton(
-              label: 'Reiniciar',
+              label: l.restart,
               icon: Icons.refresh,
               filled: false,
               onPressed: onRestart),
           const SizedBox(height: 12),
           PrimaryButton(
-              label: 'Salir',
+              label: l.exit,
               icon: Icons.home_outlined,
               filled: false,
-              color: AppColors.textMuted,
+              color: palette.textMuted,
               onPressed: onExit),
         ],
       ),
@@ -58,7 +61,7 @@ class _OverlayScrim extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned.fill(
       child: ColoredBox(
-        color: AppColors.bg.withValues(alpha: 0.82),
+        color: context.palette.bg.withValues(alpha: 0.82),
         child: Center(child: child),
       ),
     );
