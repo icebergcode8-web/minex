@@ -60,6 +60,7 @@ class _GameView extends StatelessWidget {
               Column(
                 children: [
                   GameTopHud(onPause: gp.pause),
+                  const GameComboBar(),
                   const Expanded(
                     child: Padding(
                       padding: EdgeInsets.all(8),
@@ -80,6 +81,10 @@ class _GameView extends StatelessWidget {
                   won: status == GameStatus.won,
                   elapsed: gp.elapsed.value,
                   isNewRecord: gp.isNewRecord,
+                  isBlitz: gp.isBlitz,
+                  blitzScore: gp.blitzScore,
+                  blitzBoards: gp.blitzBoards,
+                  timeUp: gp.timeUp,
                   onPlayAgain: gp.restart,
                   onExit: () => Navigator.of(context).pop(),
                 ),

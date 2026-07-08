@@ -59,6 +59,12 @@ class DifficultySelectScreen extends StatelessWidget {
                   },
                 ),
               ),
+            // Tablero personalizado (plan §2.1).
+            _CustomCard(
+              label: l.difficultyCustom,
+              onTap: () =>
+                  Navigator.of(context).pushNamed(Routes.customSetup),
+            ),
           ],
         ),
       ),
@@ -119,6 +125,36 @@ class _DifficultyCard extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta que lleva a la configuración de tablero personalizado (plan §2.1).
+class _CustomCard extends StatelessWidget {
+  const _CustomCard({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(Icons.tune_rounded, color: palette.primary),
+          const SizedBox(width: 14),
+          Text(label,
+              style: TextStyle(
+                color: palette.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              )),
+          const Spacer(),
+          Icon(Icons.chevron_right_rounded, color: palette.primary),
         ],
       ),
     );

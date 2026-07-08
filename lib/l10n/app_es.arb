@@ -38,6 +38,20 @@
   "difficultyMedium": "Medio",
   "difficultyHard": "Difícil",
   "difficultyExpert": "Experto",
+  "difficultyCustom": "Personalizado",
+  "customTitle": "Tablero personalizado",
+  "customRows": "Filas",
+  "customCols": "Columnas",
+  "customMines": "Minas",
+  "customStart": "Empezar",
+  "customDensity": "Densidad {percent}%",
+  "@customDensity": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "customMinesMax": "máx {max}",
+  "@customMinesMax": {
+    "placeholders": { "max": { "type": "int" } }
+  },
   "boardSummary": "{rows}×{cols} · {mines} minas",
   "@boardSummary": {
     "description": "Resumen de tamaño de tablero y minas",
@@ -52,6 +66,16 @@
 
   "reveal": "Revelar",
   "flag": "Bandera",
+
+  "blitzScoreLabel": "Puntos",
+  "blitzBoardsLabel": "Tableros",
+  "blitzTimeUp": "¡Se acabó el tiempo!",
+  "blitzBest": "Mejor: {score}",
+  "@blitzBest": {
+    "placeholders": { "score": { "type": "int" } }
+  },
+  "comboLabel": "COMBO",
+  "freezer": "Congelar",
 
   "pauseTitle": "Pausa",
   "resume": "Continuar",

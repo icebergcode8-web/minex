@@ -33,7 +33,7 @@
 - [x] Navegación completa (Navigator 1.0 + `onGenerateRoute`, `PageRouteBuilder`, `PopScope` en GameScreen)
 - [x] Pantallas: ModeSelect (carrusel), Stats (CustomPaint), Settings
 - [x] Localización completa de todos los strings (es/en)
-- [ ] _Pendiente arrastrado de F1:_ UI de dificultad **Personalizada** (el `GameConfig` ya existe)
+- [x] _Pendiente arrastrado de F1:_ UI de dificultad **Personalizada** — `custom_setup_screen.dart` con sliders y validación de densidad máx 30%
 
 ## 💰 Fase 3 — Ads
 - [ ] `ad_config.dart` con switch test/prod y doble candado (`kReleaseMode`)
@@ -43,7 +43,7 @@
 - [ ] Consentimiento **UMP** antes de inicializar ads
 
 ## 🕹️ Fase 4 — Modos nuevos (en este orden de complejidad)
-- [ ] **Blitz** (`scoring.dart` con combos, cronómetro descendente, +20s)
+- [x] **Blitz** (`scoring.dart` con combos + tests, cronómetro descendente, +20s, regen de tablero, HUD combo, ítem Congelador) — jugable desde ModeSelect
 - [ ] **Niebla** (`fog_engine.dart`, radio de visibilidad, ítem Linterna)
 - [ ] **Mentiroso** (`liar_engine.dart`, ±1 con marca sutil, ítem Escáner)
 - [ ] **Oleadas** (`waves_engine.dart`, mejoras roguelike, modificadores, 3 vidas, **savegame serializado**)

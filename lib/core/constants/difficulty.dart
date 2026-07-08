@@ -52,6 +52,15 @@ GameConfig classicConfig(Difficulty difficulty, {int? seed}) {
   );
 }
 
+/// Config del modo Contrarreloj / Blitz (plan §2.3): 9×9 con 10 minas, fijo.
+GameConfig blitzConfig({int? seed}) => GameConfig(
+      mode: GameMode.blitz,
+      rows: 9,
+      cols: 9,
+      mines: 10,
+      seed: seed,
+    );
+
 /// Construye un [GameConfig] clásico personalizado, validando los límites.
 GameConfig classicCustomConfig({
   required int rows,

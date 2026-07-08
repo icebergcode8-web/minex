@@ -66,6 +66,7 @@ class _BoardWidgetState extends State<BoardWidget>
   final Set<int> _flaggedSnapshot = {};
 
   int _lastBatch = 0;
+  int _lastGeneration = 0;
   GameStatus _lastStatus = GameStatus.idle;
   double _explodeStartMs = -1;
   double _winStartMs = -1;
@@ -113,6 +114,15 @@ class _BoardWidgetState extends State<BoardWidget>
     var needsShake = false;
     var revealed = false;
     var flagged = false;
+
+    // Tablero nuevo (nueva partida o siguiente tablero de Blitz): limpiar
+    // animaciones de revelado/bandera para que el nuevo tablero anime de cero.
+    if (gp.boardGeneration != _lastGeneration) {
+      _lastGeneration = gp.boardGeneration;
+      _revealStart.clear();
+      _flagStart.clear();
+      _flaggedSnapshot.clear();
+    }
 
     if (gp.revealBatchId != _lastBatch) {
       _lastBatch = gp.revealBatchId;

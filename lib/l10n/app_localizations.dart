@@ -242,6 +242,54 @@ abstract class AppLocalizations {
   /// **'Experto'**
   String get difficultyExpert;
 
+  /// No description provided for @difficultyCustom.
+  ///
+  /// In es, this message translates to:
+  /// **'Personalizado'**
+  String get difficultyCustom;
+
+  /// No description provided for @customTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tablero personalizado'**
+  String get customTitle;
+
+  /// No description provided for @customRows.
+  ///
+  /// In es, this message translates to:
+  /// **'Filas'**
+  String get customRows;
+
+  /// No description provided for @customCols.
+  ///
+  /// In es, this message translates to:
+  /// **'Columnas'**
+  String get customCols;
+
+  /// No description provided for @customMines.
+  ///
+  /// In es, this message translates to:
+  /// **'Minas'**
+  String get customMines;
+
+  /// No description provided for @customStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar'**
+  String get customStart;
+
+  /// No description provided for @customDensity.
+  ///
+  /// In es, this message translates to:
+  /// **'Densidad {percent}%'**
+  String customDensity(int percent);
+
+  /// No description provided for @customMinesMax.
+  ///
+  /// In es, this message translates to:
+  /// **'máx {max}'**
+  String customMinesMax(int max);
+
   /// Resumen de tamaño de tablero y minas
   ///
   /// In es, this message translates to:
@@ -271,6 +319,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Bandera'**
   String get flag;
+
+  /// No description provided for @blitzScoreLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos'**
+  String get blitzScoreLabel;
+
+  /// No description provided for @blitzBoardsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tableros'**
+  String get blitzBoardsLabel;
+
+  /// No description provided for @blitzTimeUp.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Se acabó el tiempo!'**
+  String get blitzTimeUp;
+
+  /// No description provided for @blitzBest.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor: {score}'**
+  String blitzBest(int score);
+
+  /// No description provided for @comboLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'COMBO'**
+  String get comboLabel;
+
+  /// No description provided for @freezer.
+  ///
+  /// In es, this message translates to:
+  /// **'Congelar'**
+  String get freezer;
 
   /// No description provided for @pauseTitle.
   ///

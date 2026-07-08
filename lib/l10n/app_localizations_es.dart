@@ -81,6 +81,34 @@ class AppLocalizationsEs extends AppLocalizations {
   String get difficultyExpert => 'Experto';
 
   @override
+  String get difficultyCustom => 'Personalizado';
+
+  @override
+  String get customTitle => 'Tablero personalizado';
+
+  @override
+  String get customRows => 'Filas';
+
+  @override
+  String get customCols => 'Columnas';
+
+  @override
+  String get customMines => 'Minas';
+
+  @override
+  String get customStart => 'Empezar';
+
+  @override
+  String customDensity(int percent) {
+    return 'Densidad $percent%';
+  }
+
+  @override
+  String customMinesMax(int max) {
+    return 'máx $max';
+  }
+
+  @override
   String boardSummary(int rows, int cols, int mines) {
     return '$rows×$cols · $mines minas';
   }
@@ -96,6 +124,26 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get flag => 'Bandera';
+
+  @override
+  String get blitzScoreLabel => 'Puntos';
+
+  @override
+  String get blitzBoardsLabel => 'Tableros';
+
+  @override
+  String get blitzTimeUp => '¡Se acabó el tiempo!';
+
+  @override
+  String blitzBest(int score) {
+    return 'Mejor: $score';
+  }
+
+  @override
+  String get comboLabel => 'COMBO';
+
+  @override
+  String get freezer => 'Congelar';
 
   @override
   String get pauseTitle => 'Pausa';

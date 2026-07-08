@@ -19,6 +19,10 @@ class ResultOverlay extends StatelessWidget {
     required this.isNewRecord,
     required this.onPlayAgain,
     required this.onExit,
+    this.isBlitz = false,
+    this.blitzScore = 0,
+    this.blitzBoards = 0,
+    this.timeUp = false,
   });
 
   final bool won;
@@ -27,11 +31,24 @@ class ResultOverlay extends StatelessWidget {
   final VoidCallback onPlayAgain;
   final VoidCallback onExit;
 
+  // Blitz (plan §2.3): el resultado muestra puntaje en vez de tiempo/récord.
+  final bool isBlitz;
+  final int blitzScore;
+  final int blitzBoards;
+  final bool timeUp;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final l = AppLocalizations.of(context)!;
-    final accent = won ? palette.primary : palette.danger;
+    // En Blitz el "confeti/verde" celebra un buen marcador aunque termine por
+    // tiempo; el rojo se reserva para morir por mina.
+    final celebrate = won || (isBlitz && timeUp);
+    final accent = celebrate ? palette.primary : palette.danger;
+
+    if (isBlitz) {
+      return _buildBlitz(context, palette, l, accent, celebrate);
+    }
     return Positioned.fill(
       child: Stack(
         children: [
@@ -114,6 +131,93 @@ class ResultOverlay extends StatelessWidget {
             ),
           ),
           if (won) const Positioned.fill(child: ConfettiOverlay()),
+        ],
+      ),
+    );
+  }
+
+  /// Resultado del modo Blitz (plan §2.3): puntaje, tableros y récord.
+  Widget _buildBlitz(
+    BuildContext context,
+    BoardPalette palette,
+    AppLocalizations l,
+    Color accent,
+    bool celebrate,
+  ) {
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          ColoredBox(
+            color: palette.bg.withValues(alpha: 0.88),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    timeUp ? l.blitzTimeUp : l.defeat,
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ).animate().scale(
+                        duration: 320.ms,
+                        curve: Curves.easeOutBack,
+                        begin: const Offset(0.6, 0.6),
+                      ),
+                  const SizedBox(height: 18),
+                  Text(
+                    '$blitzScore',
+                    style: AppTheme.mono(
+                      fontSize: 56,
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(l.blitzScoreLabel,
+                      style: TextStyle(color: palette.textMuted)),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${l.blitzBoardsLabel}: $blitzBoards',
+                    style: TextStyle(color: palette.textMuted, fontSize: 14),
+                  ),
+                  if (isNewRecord)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: palette.secondary.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(l.newRecord,
+                            style: TextStyle(
+                              color: palette.secondary,
+                              fontWeight: FontWeight.w800,
+                            )),
+                      ),
+                    ),
+                  const SizedBox(height: 28),
+                  PrimaryButton(
+                    label: l.playAgain,
+                    icon: Icons.refresh,
+                    onPressed: onPlayAgain,
+                  ),
+                  const SizedBox(height: 12),
+                  PrimaryButton(
+                    label: l.menu,
+                    icon: Icons.home_outlined,
+                    filled: false,
+                    color: palette.textMuted,
+                    onPressed: onExit,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (celebrate && isNewRecord)
+            const Positioned.fill(child: ConfettiOverlay()),
         ],
       ),
     );

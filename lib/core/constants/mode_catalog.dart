@@ -52,7 +52,7 @@ const List<ModeInfo> kModeCatalog = [
       mode: GameMode.blitz,
       emoji: '⚡',
       icon: Icons.bolt_rounded,
-      available: false),
+      available: true),
   ModeInfo(
       mode: GameMode.fog,
       emoji: '🌫️',

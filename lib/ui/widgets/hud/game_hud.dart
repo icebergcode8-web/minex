@@ -7,7 +7,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/game_provider.dart';
 
-/// HUD superior de la partida (plan §8.4): pausa, contador de minas y
+/// HUD superior de la partida (plan §8.4): pausa, contador de minas/puntos y
 /// cronómetro. El cronómetro escucha su propio `ValueNotifier`, así que se
 /// actualiza sin reconstruir el tablero (plan §6.3 regla 4).
 class GameTopHud extends StatelessWidget {
@@ -19,30 +19,99 @@ class GameTopHud extends StatelessWidget {
   Widget build(BuildContext context) {
     final gp = context.watch<GameProvider>();
     final palette = context.palette;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
           _HudButton(icon: Icons.pause, onTap: onPause),
           const Spacer(),
-          _HudChip(
-            icon: Icons.flag,
-            color: palette.danger,
-            label: '${gp.minesRemaining}',
-          ),
+          if (gp.isBlitz)
+            _HudChip(
+              icon: Icons.star_rounded,
+              color: palette.secondary,
+              label: '${gp.blitzScore}',
+            )
+          else
+            _HudChip(
+              icon: Icons.flag,
+              color: palette.danger,
+              label: '${gp.minesRemaining}',
+            ),
           const SizedBox(width: 10),
           ValueListenableBuilder<Duration>(
             valueListenable: gp.elapsed,
-            builder: (_, value, child) => _HudChip(
+            builder: (_, value, _) => _HudChip(
               icon: Icons.timer_outlined,
-              color: palette.primary,
+              color: gp.isBlitz && value.inSeconds <= 10
+                  ? palette.danger
+                  : palette.primary,
               label: formatClock(value),
               monospace: true,
             ),
           ),
           const Spacer(),
-          // Placeholder de ítems (se activa en Fase 4).
-          const SizedBox(width: 40),
+          if (gp.isBlitz)
+            _FreezerButton(
+              charges: gp.freezerCharges,
+              onTap: gp.useFreezer,
+            )
+          else
+            const SizedBox(width: 40),
+        ],
+      ),
+    );
+  }
+}
+
+/// Barra de combo del modo Blitz (plan §5.2): glow pulsante y multiplicador.
+class GameComboBar extends StatelessWidget {
+  const GameComboBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final gp = context.watch<GameProvider>();
+    if (!gp.isBlitz) return const SizedBox.shrink();
+    final palette = context.palette;
+    final l = AppLocalizations.of(context)!;
+    final mult = gp.comboMultiplier;
+    final active = mult > 1;
+    final color = active ? palette.secondary : palette.textMuted;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      child: Row(
+        children: [
+          Text(
+            l.comboLabel,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w900,
+              fontSize: 11,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: gp.comboProgress,
+                minHeight: 8,
+                backgroundColor: palette.surface,
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            '×$mult',
+            style: AppTheme.mono(
+              fontSize: 16,
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -103,6 +172,46 @@ class GameActionBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FreezerButton extends StatelessWidget {
+  const _FreezerButton({required this.charges, required this.onTap});
+
+  final int charges;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final enabled = charges > 0;
+    return Opacity(
+      opacity: enabled ? 1 : 0.4,
+      child: Material(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: enabled ? onTap : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('❄️', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 4),
+                Text('$charges',
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                    )),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

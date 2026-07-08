@@ -11,6 +11,7 @@ import 'package:minex/providers/game_provider.dart';
 class FakeRecordsRepository extends RecordsRepository {
   FakeRecordsRepository() : super(HiveService());
   int? _best;
+  int _blitzBest = 0;
 
   @override
   int? bestTimeMs(Difficulty d) => _best;
@@ -23,6 +24,18 @@ class FakeRecordsRepository extends RecordsRepository {
   }) async {
     if (won && (_best == null || elapsed.inMilliseconds < _best!)) {
       _best = elapsed.inMilliseconds;
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  int get blitzBestScore => _blitzBest;
+
+  @override
+  Future<bool> recordBlitz(int score) async {
+    if (score > _blitzBest) {
+      _blitzBest = score;
       return true;
     }
     return false;
@@ -116,5 +129,62 @@ void main() {
     gp.resume();
     expect(gp.status, GameStatus.playing);
     gp.dispose();
+  });
+
+  group('Blitz (§2.3)', () {
+    GameProvider newBlitz() => GameProvider(
+          config: blitzConfig(seed: 42),
+          difficulty: Difficulty.easy,
+          records: FakeRecordsRepository(),
+        );
+
+    test('arranca con cuenta atrás de 60s y sin puntaje', () {
+      final gp = newBlitz();
+      expect(gp.isBlitz, isTrue);
+      expect(gp.status, GameStatus.idle);
+      expect(gp.elapsed.value, const Duration(seconds: 60));
+      expect(gp.blitzScore, 0);
+      gp.dispose();
+    });
+
+    test('completar el tablero NO gana: avanza al siguiente y suma marcador',
+        () {
+      final gp = newBlitz();
+      gp.onTap(0, 0); // genera y arranca
+      // Revelar todas las celdas seguras del tablero actual.
+      final board = gp.board;
+      for (final cell in board.cells) {
+        if (!cell.hasMine && !cell.isRevealed && gp.blitzBoards == 0) {
+          gp.onTap(cell.row, cell.col);
+        }
+      }
+      expect(gp.blitzBoards, 1, reason: 'debe avanzar de tablero');
+      expect(gp.status, GameStatus.playing, reason: 'no termina la partida');
+      expect(gp.blitzScore, greaterThan(0));
+      gp.dispose();
+    });
+
+    test('tocar una mina termina la partida (sin timeUp)', () {
+      final gp = newBlitz();
+      gp.onTap(0, 0);
+      expect(gp.status, GameStatus.playing);
+      final mine = gp.board.cells.firstWhere((c) => c.hasMine);
+      gp.onTap(mine.row, mine.col);
+      expect(gp.status, GameStatus.lost);
+      expect(gp.timeUp, isFalse);
+      expect(gp.explodedCell, isNotNull);
+      gp.dispose();
+    });
+
+    test('el Congelador suma tiempo y consume carga', () {
+      final gp = newBlitz();
+      gp.onTap(0, 0); // playing
+      expect(gp.freezerCharges, 1);
+      gp.useFreezer();
+      expect(gp.freezerCharges, 0);
+      // Restante por encima de 60s tras el bono de 10s (menos lo ya corrido).
+      expect(gp.elapsed.value.inSeconds, greaterThanOrEqualTo(60));
+      gp.dispose();
+    });
   });
 }

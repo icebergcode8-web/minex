@@ -6,6 +6,7 @@ abstract final class Routes {
   static const home = '/';
   static const modeSelect = '/modes';
   static const difficulty = '/difficulty';
+  static const customSetup = '/custom';
   static const game = '/game';
   static const stats = '/stats';
   static const settings = '/settings';

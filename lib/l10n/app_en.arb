@@ -26,6 +26,20 @@
   "difficultyMedium": "Medium",
   "difficultyHard": "Hard",
   "difficultyExpert": "Expert",
+  "difficultyCustom": "Custom",
+  "customTitle": "Custom board",
+  "customRows": "Rows",
+  "customCols": "Columns",
+  "customMines": "Mines",
+  "customStart": "Start",
+  "customDensity": "Density {percent}%",
+  "@customDensity": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "customMinesMax": "max {max}",
+  "@customMinesMax": {
+    "placeholders": { "max": { "type": "int" } }
+  },
   "boardSummary": "{rows}×{cols} · {mines} mines",
   "@boardSummary": {
     "placeholders": {
@@ -39,6 +53,16 @@
 
   "reveal": "Reveal",
   "flag": "Flag",
+
+  "blitzScoreLabel": "Score",
+  "blitzBoardsLabel": "Boards",
+  "blitzTimeUp": "Time's up!",
+  "blitzBest": "Best: {score}",
+  "@blitzBest": {
+    "placeholders": { "score": { "type": "int" } }
+  },
+  "comboLabel": "COMBO",
+  "freezer": "Freeze",
 
   "pauseTitle": "Paused",
   "resume": "Resume",

@@ -40,4 +40,18 @@ class RecordsRepository {
     }
     return false;
   }
+
+  // ── Blitz (plan §2.3): mejor puntaje local ─────────────────────────
+  static const _kBlitzBest = 'blitz_bestScore';
+
+  int get blitzBestScore => _hive.records.get(_kBlitzBest, defaultValue: 0);
+
+  /// Guarda el puntaje de una partida Blitz. Devuelve `true` si es récord.
+  Future<bool> recordBlitz(int score) async {
+    if (score > blitzBestScore) {
+      await _hive.records.put(_kBlitzBest, score);
+      return true;
+    }
+    return false;
+  }
 }

@@ -6,14 +6,20 @@ import '../core/constants/difficulty.dart';
 import '../data/repositories/records_repository.dart';
 import '../domain/engine/board_generator.dart';
 import '../domain/engine/minesweeper_engine.dart';
+import '../domain/engine/scoring.dart';
 import '../domain/models/board.dart';
 import '../domain/models/cell.dart';
 import '../domain/models/game_config.dart';
+import '../domain/models/game_mode.dart';
 import '../domain/models/game_status.dart';
 
 /// Estado de la partida actual (plan §6.3). **No contiene lógica de juego**:
-/// orquesta el engine (Dart puro) ↔ la UI y notifica cambios. Se crea scoped a
+/// orquesta los engines (Dart puro) ↔ la UI y notifica cambios. Se crea scoped a
 /// `GameScreen` con `ChangeNotifierProvider` y se destruye al salir.
+///
+/// Soporta el modo Clásico (§2.1) y Contrarreloj/Blitz (§2.3). Blitz añade
+/// cronómetro descendente, regeneración de tablero y puntaje con combos
+/// (delegado en [BlitzScoring]).
 class GameProvider extends ChangeNotifier {
   GameProvider({
     required this.config,
@@ -42,6 +48,13 @@ class GameProvider extends ChangeNotifier {
   final MinesweeperEngine _engine;
   final bool _invertControls;
 
+  // ── Constantes de Blitz (plan §2.3) ────────────────────────────────
+  static const _blitzBudgetMs = 60000; // 60s iniciales
+  static const _blitzBoardBonusMs = 20000; // +20s por tablero
+  static const _freezerBonusMs = 10000; // Congelador: +10s
+
+  bool get isBlitz => config.mode == GameMode.blitz;
+
   // ── Estado observable ──────────────────────────────────────────────
   late Board _board;
   Board get board => _board;
@@ -55,10 +68,29 @@ class GameProvider extends ChangeNotifier {
   bool _minesPlaced = false;
 
   /// Cronómetro en su propio notificador → el HUD del tiempo se reconstruye
-  /// solo, sin repintar el tablero (plan §6.3 regla 4).
+  /// solo, sin repintar el tablero (plan §6.3 regla 4). En Clásico cuenta hacia
+  /// arriba (tiempo transcurrido); en Blitz hacia abajo (tiempo restante).
   final ValueNotifier<Duration> elapsed = ValueNotifier(Duration.zero);
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _ticker;
+
+  // ── Blitz ──────────────────────────────────────────────────────────
+  final BlitzScoring _scoring = BlitzScoring();
+  int _timeBudgetMs = _blitzBudgetMs;
+  int _freezerCharges = 1;
+  bool _timeUp = false;
+
+  int get blitzScore => _scoring.score;
+  int get blitzBoards => _scoring.boardsSolved;
+  int get comboMultiplier => _scoring.multiplier;
+  double get comboProgress => _scoring.comboProgress;
+  int get freezerCharges => _freezerCharges;
+  bool get timeUp => _timeUp;
+
+  /// Se incrementa cada vez que empieza un tablero nuevo (nueva partida o
+  /// siguiente tablero de Blitz). El BoardWidget lo usa para limpiar sus
+  /// animaciones de revelado entre tableros.
+  int boardGeneration = 0;
 
   // ── Resultado ──────────────────────────────────────────────────────
   bool _isNewRecord = false;
@@ -91,16 +123,35 @@ class GameProvider extends ChangeNotifier {
     _isNewRecord = false;
     explodedCell = null;
     lastRevealed = const [];
+    boardGeneration++;
+    _scoring.reset();
+    _timeBudgetMs = _blitzBudgetMs;
+    _freezerCharges = 1;
+    _timeUp = false;
     _stopwatch
       ..reset()
       ..stop();
-    elapsed.value = Duration.zero;
+    elapsed.value =
+        isBlitz ? const Duration(milliseconds: _blitzBudgetMs) : Duration.zero;
     _stopTicker();
   }
 
   void restart() {
     _startNewBoard();
     notifyListeners();
+  }
+
+  /// Blitz: prepara el siguiente tablero sin detener la partida ni el reloj.
+  void _startFreshBlitzBoard() {
+    _board = Board.empty(
+      rows: config.rows,
+      cols: config.cols,
+      mineCount: config.mines,
+    );
+    _minesPlaced = false;
+    explodedCell = null;
+    lastRevealed = const [];
+    boardGeneration++;
   }
 
   // ── Entrada del jugador ────────────────────────────────────────────
@@ -137,6 +188,17 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Ítem Congelador (plan §3.1): suma 10s al presupuesto de Blitz. 1 carga.
+  void useFreezer() {
+    if (!isBlitz || _freezerCharges <= 0 || _status != GameStatus.playing) {
+      return;
+    }
+    _freezerCharges--;
+    _timeBudgetMs += _freezerBonusMs;
+    _refreshCountdown();
+    notifyListeners();
+  }
+
   // ── Acciones internas ──────────────────────────────────────────────
   void _reveal(int row, int col) {
     if (isTerminal || _status == GameStatus.paused) return;
@@ -144,7 +206,7 @@ class GameProvider extends ChangeNotifier {
     // Primer toque: se genera el tablero DESPUÉS, con esta celda segura.
     if (!_minesPlaced) {
       _placeMines(safeRow: row, safeCol: col);
-      _beginPlaying();
+      if (_status != GameStatus.playing) _beginPlaying();
     }
 
     final result = _engine.reveal(_board, row, col);
@@ -159,13 +221,32 @@ class GameProvider extends ChangeNotifier {
     if (hitMine) {
       explodedCell = revealed.isNotEmpty ? revealed.last : null;
       _engine.revealAllMines(_board);
+      if (isBlitz) _scoring.breakCombo();
       _finish(GameStatus.lost);
       return;
     }
+
+    if (isBlitz && revealed.isNotEmpty) {
+      _scoring.registerReveal(revealed.length, _stopwatch.elapsedMilliseconds);
+    }
+
     if (_engine.isWon(_board)) {
+      if (isBlitz) {
+        _blitzAdvance();
+        return;
+      }
       _finish(GameStatus.won);
       return;
     }
+    notifyListeners();
+  }
+
+  /// Blitz: tablero completado → bono de tiempo, +1 al marcador y tablero nuevo.
+  void _blitzAdvance() {
+    _scoring.registerBoardCleared();
+    _timeBudgetMs += _blitzBoardBonusMs;
+    _refreshCountdown();
+    _startFreshBlitzBoard();
     notifyListeners();
   }
 
@@ -202,10 +283,24 @@ class GameProvider extends ChangeNotifier {
     _startTicker();
   }
 
+  int get _remainingMs =>
+      (_timeBudgetMs - _stopwatch.elapsedMilliseconds).clamp(0, 1 << 31);
+
+  void _refreshCountdown() {
+    if (isBlitz) elapsed.value = Duration(milliseconds: _remainingMs);
+  }
+
   void _finish(GameStatus status) {
     _status = status;
     _stopwatch.stop();
     _stopTicker();
+
+    if (isBlitz) {
+      _isNewRecord = _finishBlitz();
+      notifyListeners();
+      return;
+    }
+
     elapsed.value = _stopwatch.elapsed;
     if (status == GameStatus.won) {
       _records.recordGame(
@@ -226,6 +321,14 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Cierra una partida Blitz: fija el reloj en 0/restante y persiste el récord.
+  bool _finishBlitz() {
+    elapsed.value = Duration(milliseconds: _timeUp ? 0 : _remainingMs);
+    final prevBest = _records.blitzBestScore;
+    _records.recordBlitz(_scoring.score);
+    return _scoring.score > prevBest;
+  }
+
   void pause() {
     if (_status != GameStatus.playing) return;
     _status = GameStatus.paused;
@@ -244,8 +347,16 @@ class GameProvider extends ChangeNotifier {
 
   void _startTicker() {
     _ticker?.cancel();
-    _ticker = Timer.periodic(const Duration(milliseconds: 250), (_) {
-      elapsed.value = _stopwatch.elapsed;
+    _ticker = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      if (isBlitz) {
+        elapsed.value = Duration(milliseconds: _remainingMs);
+        if (_remainingMs <= 0) {
+          _timeUp = true;
+          _finish(GameStatus.lost);
+        }
+      } else {
+        elapsed.value = _stopwatch.elapsed;
+      }
     });
   }
 

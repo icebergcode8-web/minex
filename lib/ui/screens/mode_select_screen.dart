@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/difficulty.dart';
 import '../../core/constants/mode_catalog.dart';
 import '../../core/constants/routes.dart';
 import '../../core/theme/app_palette.dart';
+import '../../domain/models/game_mode.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/common/app_background.dart';
 
@@ -33,6 +35,25 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
     super.dispose();
   }
 
+  /// Lanza el modo elegido. Clásico pasa por selección de dificultad; Blitz es
+  /// de tablero fijo (§2.3) y entra directo a la partida.
+  void _launch(BuildContext context, GameMode mode) {
+    final nav = Navigator.of(context);
+    switch (mode) {
+      case GameMode.blitz:
+        nav.pushNamed(
+          Routes.game,
+          arguments: GameArgs(
+            config: blitzConfig(),
+            difficulty: Difficulty.easy, // no aplica a Blitz; récord propio
+          ),
+        );
+      case GameMode.classic:
+      default:
+        nav.pushNamed(Routes.difficulty);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
@@ -58,8 +79,7 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
                       child: _ModeCard(
                         info: info,
                         onTap: info.available
-                            ? () => Navigator.of(context)
-                                .pushNamed(Routes.difficulty)
+                            ? () => _launch(context, info.mode)
                             : null,
                       ),
                     );

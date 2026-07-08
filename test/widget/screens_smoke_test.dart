@@ -10,6 +10,7 @@ import 'package:minex/data/local/hive_service.dart';
 import 'package:minex/data/repositories/records_repository.dart';
 import 'package:minex/data/repositories/settings_repository.dart';
 import 'package:minex/l10n/app_localizations.dart';
+import 'package:minex/ui/screens/custom_setup_screen.dart';
 import 'package:minex/ui/screens/difficulty_select_screen.dart';
 import 'package:minex/ui/screens/game_screen.dart';
 
@@ -101,6 +102,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(tester.takeException(), isNull);
     expect(find.text('Bandera'), findsOneWidget);
+  });
+
+  testWidgets('CustomSetupScreen muestra los tres controles', (tester) async {
+    await tester.pumpWidget(_wrap(const CustomSetupScreen()));
+    await tester.pump();
+    expect(find.text('Filas'), findsOneWidget);
+    expect(find.text('Columnas'), findsOneWidget);
+    expect(find.text('Minas'), findsOneWidget);
+    expect(find.byType(Slider), findsNWidgets(3));
+    // Mover un slider no debe romper ni violar la densidad máxima.
+    await tester.drag(find.byType(Slider).first, const Offset(200, 0));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('el botón de pausa no rompe la app', (tester) async {
