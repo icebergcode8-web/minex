@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_palette.dart';
@@ -52,9 +52,16 @@ class GameTopHud extends StatelessWidget {
           ),
           const Spacer(),
           if (gp.isBlitz)
-            _FreezerButton(
+            _ItemButton(
+              emoji: '❄️',
               charges: gp.freezerCharges,
               onTap: gp.useFreezer,
+            )
+          else if (gp.isFog)
+            _ItemButton(
+              emoji: '🔦',
+              charges: gp.flashlightCharges,
+              onTap: gp.useFlashlight,
             )
           else
             const SizedBox(width: 40),
@@ -177,9 +184,14 @@ class GameActionBar extends StatelessWidget {
   }
 }
 
-class _FreezerButton extends StatelessWidget {
-  const _FreezerButton({required this.charges, required this.onTap});
+class _ItemButton extends StatelessWidget {
+  const _ItemButton({
+    required this.emoji,
+    required this.charges,
+    required this.onTap,
+  });
 
+  final String emoji;
   final int charges;
   final VoidCallback onTap;
 
@@ -200,7 +212,7 @@ class _FreezerButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('❄️', style: TextStyle(fontSize: 16)),
+                Text(emoji, style: const TextStyle(fontSize: 16)),
                 const SizedBox(width: 4),
                 Text('$charges',
                     style: TextStyle(

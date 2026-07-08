@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../core/audio/audio_service.dart';
 import '../../../core/haptics/haptics_service.dart';
 import '../../../core/theme/app_palette.dart';
+import '../../../domain/engine/fog_engine.dart';
 import '../../../domain/models/board.dart';
 import '../../../domain/models/cell.dart';
 import '../../../domain/models/game_status.dart';
@@ -65,11 +66,18 @@ class _BoardWidgetState extends State<BoardWidget>
   /// Índices actualmente con bandera, para detectar banderas nuevas.
   final Set<int> _flaggedSnapshot = {};
 
+  /// Motor puro de visibilidad para el modo Niebla (§2.2).
+  static const _fog = FogEngine();
+
   int _lastBatch = 0;
   int _lastGeneration = 0;
   GameStatus _lastStatus = GameStatus.idle;
   double _explodeStartMs = -1;
   double _winStartMs = -1;
+
+  /// `true` mientras el modo Niebla esté en juego: mantiene el ticker vivo para
+  /// animar el fade de visibilidad aunque no haya otras animaciones.
+  bool _fogActive = false;
 
   double get _now => _clock.elapsedMilliseconds.toDouble();
 
@@ -78,6 +86,7 @@ class _BoardWidgetState extends State<BoardWidget>
   AudioService get _audio => context.read<AudioService>();
 
   bool get _isAnimating {
+    if (_fogActive) return true;
     if (_shake.isAnimating) return true;
     if (_explodeStartMs >= 0 && _now - _explodeStartMs < 620) return true;
     if (_winStartMs >= 0 && _now - _winStartMs < _winMs + 400) return true;
@@ -174,6 +183,10 @@ class _BoardWidgetState extends State<BoardWidget>
       }
     }
 
+    // Niebla en juego: mantener el ticker vivo para animar el fade.
+    _fogActive = gp.isFog && gp.status == GameStatus.playing;
+    if (_fogActive) needsTick = true;
+
     if (needsTick || needsShake || revealed || flagged) {
       final won = gp.status == GameStatus.won;
       final lost = gp.status == GameStatus.lost;
@@ -224,6 +237,26 @@ class _BoardWidgetState extends State<BoardWidget>
     return ((_now - _winStartMs) / _winMs).clamp(0.0, 1.0);
   }
 
+  /// Devuelve una función celda→brillo (0..1) para el modo Niebla, o `null` en
+  /// el resto de modos. Usa el reloj de pared para animar el fade de forma
+  /// continua entre revelados (§2.2). El cálculo vive en [FogEngine] (puro).
+  double Function(int row, int col)? _buildFogBrightness(GameProvider gp) {
+    if (!gp.isFog) return null;
+    final playing = gp.status == GameStatus.playing;
+    final focusR = gp.fogFocusRow;
+    final focusC = gp.fogFocusCol;
+    final focusEpoch = gp.fogFocusEpochMs;
+    final flashUntil = gp.flashlightUntilEpochMs;
+    return (row, col) {
+      if (!playing) return 1; // idle/terminal/pausa: ver todo
+      final now = DateTime.now().millisecondsSinceEpoch;
+      if (now < flashUntil) return 1; // Linterna activa
+      if (focusR < 0) return 1; // aún sin primer toque
+      final dist = _fog.chebyshev(row, col, focusR, focusC);
+      return _fog.brightness(distance: dist, sinceFocusMs: now - focusEpoch);
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final gp = context.watch<GameProvider>();
@@ -231,6 +264,7 @@ class _BoardWidgetState extends State<BoardWidget>
     _syncAnimations(gp);
 
     final board = gp.board;
+    final fogBrightness = _buildFogBrightness(gp);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -271,6 +305,7 @@ class _BoardWidgetState extends State<BoardWidget>
                           : ((_now - _explodeStartMs) / 500).clamp(0.0, 1.0),
                       winProgress: _winProgress(),
                       shakeOffset: _shakeOffset(),
+                      fogBrightness: fogBrightness,
                     ),
                   ),
                 ),
@@ -342,6 +377,7 @@ class _BoardPainter extends CustomPainter {
     required this.explosionProgress,
     required this.winProgress,
     required this.shakeOffset,
+    required this.fogBrightness,
   }) : super(repaint: repaint);
 
   final Board board;
@@ -353,6 +389,9 @@ class _BoardPainter extends CustomPainter {
   final double explosionProgress;
   final double winProgress;
   final Offset shakeOffset;
+
+  /// Modo Niebla (§2.2): brillo 0..1 por celda. `null` en el resto de modos.
+  final double Function(int row, int col)? fogBrightness;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -370,6 +409,17 @@ class _BoardPainter extends CustomPainter {
         _paintRevealed(canvas, cell, rect);
       } else {
         _paintHidden(canvas, cell, rect);
+      }
+      // Niebla: oscurecer la celda según su visibilidad (§2.2).
+      if (fogBrightness != null) {
+        final b = fogBrightness!(cell.row, cell.col);
+        if (b < 1) {
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(rect.deflate(1), const Radius.circular(5)),
+            Paint()
+              ..color = palette.bg.withValues(alpha: (1 - b).clamp(0.0, 1.0)),
+          );
+        }
       }
     }
 

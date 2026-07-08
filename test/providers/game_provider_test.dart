@@ -187,4 +187,48 @@ void main() {
       gp.dispose();
     });
   });
+
+  group('Niebla (§2.2)', () {
+    GameProvider newFog(FakeRecordsRepository records) => GameProvider(
+          config: fogConfig(Difficulty.easy, seed: 99),
+          difficulty: Difficulty.easy,
+          records: records,
+        );
+
+    test('el foco se fija en la celda tocada al revelar', () {
+      final gp = newFog(FakeRecordsRepository());
+      expect(gp.isFog, isTrue);
+      expect(gp.fogFocusRow, -1); // sin foco antes del primer toque
+      gp.onTap(4, 4);
+      expect(gp.fogFocusRow, 4);
+      expect(gp.fogFocusCol, 4);
+      gp.dispose();
+    });
+
+    test('la Linterna consume carga y fija una ventana futura', () {
+      final gp = newFog(FakeRecordsRepository());
+      gp.onTap(0, 0); // playing
+      expect(gp.flashlightCharges, 1);
+      final before = DateTime.now().millisecondsSinceEpoch;
+      gp.useFlashlight();
+      expect(gp.flashlightCharges, 0);
+      expect(gp.flashlightUntilEpochMs, greaterThan(before));
+      gp.dispose();
+    });
+
+    test('ganar en Niebla NO escribe récords del clásico', () {
+      final records = FakeRecordsRepository();
+      final gp = newFog(records);
+      gp.onTap(0, 0);
+      for (final cell in gp.board.cells) {
+        if (!cell.hasMine && !cell.isRevealed) {
+          gp.onTap(cell.row, cell.col);
+        }
+      }
+      expect(gp.status, GameStatus.won);
+      // El clásico no fue tocado: sin mejor tiempo registrado.
+      expect(records.bestTimeMs(Difficulty.easy), isNull);
+      gp.dispose();
+    });
+  });
 }

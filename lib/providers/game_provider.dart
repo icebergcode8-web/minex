@@ -53,7 +53,11 @@ class GameProvider extends ChangeNotifier {
   static const _blitzBoardBonusMs = 20000; // +20s por tablero
   static const _freezerBonusMs = 10000; // Congelador: +10s
 
+  static const _flashlightMs = 5000; // Linterna: ilumina 5s (§2.2)
+
   bool get isBlitz => config.mode == GameMode.blitz;
+  bool get isFog => config.mode == GameMode.fog;
+  bool get isClassicScored => config.mode == GameMode.classic;
 
   // ── Estado observable ──────────────────────────────────────────────
   late Board _board;
@@ -86,6 +90,21 @@ class GameProvider extends ChangeNotifier {
   double get comboProgress => _scoring.comboProgress;
   int get freezerCharges => _freezerCharges;
   bool get timeUp => _timeUp;
+
+  // ── Niebla (plan §2.2) ─────────────────────────────────────────────
+  // El foco es la última celda tocada; el brillo de cada celda lo calcula el
+  // FogEngine (puro) en el BoardWidget usando estos datos + el reloj de pared.
+  int _fogFocusRow = -1;
+  int _fogFocusCol = -1;
+  int _fogFocusEpochMs = 0;
+  int _flashlightCharges = 1;
+  int _flashlightUntilEpochMs = 0;
+
+  int get fogFocusRow => _fogFocusRow;
+  int get fogFocusCol => _fogFocusCol;
+  int get fogFocusEpochMs => _fogFocusEpochMs;
+  int get flashlightUntilEpochMs => _flashlightUntilEpochMs;
+  int get flashlightCharges => _flashlightCharges;
 
   /// Se incrementa cada vez que empieza un tablero nuevo (nueva partida o
   /// siguiente tablero de Blitz). El BoardWidget lo usa para limpiar sus
@@ -128,6 +147,11 @@ class GameProvider extends ChangeNotifier {
     _timeBudgetMs = _blitzBudgetMs;
     _freezerCharges = 1;
     _timeUp = false;
+    _fogFocusRow = -1;
+    _fogFocusCol = -1;
+    _fogFocusEpochMs = 0;
+    _flashlightCharges = 1;
+    _flashlightUntilEpochMs = 0;
     _stopwatch
       ..reset()
       ..stop();
@@ -180,6 +204,7 @@ class GameProvider extends ChangeNotifier {
     if (_status != GameStatus.playing) return;
     final result = _engine.chord(_board, row, col);
     if (result.isNoop) return;
+    if (isFog) _setFogFocus(row, col);
     _applyReveal(result.revealed, result.hitMine);
   }
 
@@ -199,6 +224,17 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Ítem Linterna (plan §2.2/§3.1): ilumina todo el tablero 5s. 1 carga.
+  void useFlashlight() {
+    if (!isFog || _flashlightCharges <= 0 || _status != GameStatus.playing) {
+      return;
+    }
+    _flashlightCharges--;
+    _flashlightUntilEpochMs =
+        DateTime.now().millisecondsSinceEpoch + _flashlightMs;
+    notifyListeners();
+  }
+
   // ── Acciones internas ──────────────────────────────────────────────
   void _reveal(int row, int col) {
     if (isTerminal || _status == GameStatus.paused) return;
@@ -211,7 +247,15 @@ class GameProvider extends ChangeNotifier {
 
     final result = _engine.reveal(_board, row, col);
     if (result.isNoop) return;
+    if (isFog) _setFogFocus(row, col);
     _applyReveal(result.revealed, result.hitMine);
+  }
+
+  /// Niebla: mueve el foco de luz a la celda tocada y reinicia su temporizador.
+  void _setFogFocus(int row, int col) {
+    _fogFocusRow = row;
+    _fogFocusCol = col;
+    _fogFocusEpochMs = DateTime.now().millisecondsSinceEpoch;
   }
 
   void _applyReveal(List<Cell> revealed, bool hitMine) {
@@ -302,21 +346,26 @@ class GameProvider extends ChangeNotifier {
     }
 
     elapsed.value = _stopwatch.elapsed;
-    if (status == GameStatus.won) {
-      _records.recordGame(
-        difficulty: difficulty,
-        won: true,
-        elapsed: _stopwatch.elapsed,
-      );
-      // Récord tentativo mostrado de inmediato; la persistencia confirma aparte.
-      final prev = _records.bestTimeMs(difficulty);
-      _isNewRecord = prev == null || _stopwatch.elapsed.inMilliseconds <= prev;
-    } else {
-      _records.recordGame(
-        difficulty: difficulty,
-        won: false,
-        elapsed: _stopwatch.elapsed,
-      );
+    // Solo el Clásico persiste récords por dificultad (récords puros, plan
+    // §2.1). Niebla y demás modos usarán su propia economía (Fase 5).
+    if (isClassicScored) {
+      if (status == GameStatus.won) {
+        _records.recordGame(
+          difficulty: difficulty,
+          won: true,
+          elapsed: _stopwatch.elapsed,
+        );
+        // Récord tentativo mostrado de inmediato; la persistencia confirma aparte.
+        final prev = _records.bestTimeMs(difficulty);
+        _isNewRecord =
+            prev == null || _stopwatch.elapsed.inMilliseconds <= prev;
+      } else {
+        _records.recordGame(
+          difficulty: difficulty,
+          won: false,
+          elapsed: _stopwatch.elapsed,
+        );
+      }
     }
     notifyListeners();
   }

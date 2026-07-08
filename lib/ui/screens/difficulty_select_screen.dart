@@ -7,14 +7,19 @@ import '../../core/theme/app_palette.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/repositories/records_repository.dart';
+import '../../domain/models/game_config.dart';
+import '../../domain/models/game_mode.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/common/app_background.dart';
 import '../widgets/common/app_card.dart';
 
-/// Selección de dificultad del modo clásico (plan §4.1). Se llega desde
-/// ModeSelect; abre la partida.
+/// Selección de dificultad (plan §4.1). Sirve al Clásico (§2.1) y a Niebla
+/// (§2.2), que comparten las mismas dificultades. El [mode] decide qué config
+/// se construye y el título.
 class DifficultySelectScreen extends StatelessWidget {
-  const DifficultySelectScreen({super.key});
+  const DifficultySelectScreen({super.key, this.mode = GameMode.classic});
+
+  final GameMode mode;
 
   static const _order = [
     Difficulty.easy,
@@ -31,12 +36,17 @@ class DifficultySelectScreen extends StatelessWidget {
         Difficulty.custom => l.difficultyExpert,
       };
 
+  bool get _isFog => mode == GameMode.fog;
+
+  GameConfig _configFor(Difficulty d) =>
+      _isFog ? fogConfig(d) : classicConfig(d);
+
   @override
   Widget build(BuildContext context) {
     final records = context.read<RecordsRepository>();
     final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l.classicMode)),
+      appBar: AppBar(title: Text(_isFog ? l.modeFog : l.classicMode)),
       body: AppBackground(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -47,24 +57,26 @@ class DifficultySelectScreen extends StatelessWidget {
                 child: _DifficultyCard(
                   label: _label(l, d),
                   preset: kDifficultyPresets[d]!,
-                  bestTimeMs: records.bestTimeMs(d),
+                  // Niebla no persiste récords por dificultad (Fase 5).
+                  bestTimeMs: _isFog ? null : records.bestTimeMs(d),
                   onTap: () {
                     Navigator.of(context).pushNamed(
                       Routes.game,
                       arguments: GameArgs(
-                        config: classicConfig(d),
+                        config: _configFor(d),
                         difficulty: d,
                       ),
                     );
                   },
                 ),
               ),
-            // Tablero personalizado (plan §2.1).
-            _CustomCard(
-              label: l.difficultyCustom,
-              onTap: () =>
-                  Navigator.of(context).pushNamed(Routes.customSetup),
-            ),
+            // Tablero personalizado: solo en Clásico (§2.1).
+            if (!_isFog)
+              _CustomCard(
+                label: l.difficultyCustom,
+                onTap: () =>
+                    Navigator.of(context).pushNamed(Routes.customSetup),
+              ),
           ],
         ),
       ),

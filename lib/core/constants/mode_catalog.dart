@@ -57,7 +57,7 @@ const List<ModeInfo> kModeCatalog = [
       mode: GameMode.fog,
       emoji: '🌫️',
       icon: Icons.cloud_rounded,
-      available: false),
+      available: true),
   ModeInfo(
       mode: GameMode.liar,
       emoji: '🃏',

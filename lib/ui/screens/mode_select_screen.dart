@@ -48,9 +48,12 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
             difficulty: Difficulty.easy, // no aplica a Blitz; récord propio
           ),
         );
+      case GameMode.fog:
+        // Niebla usa las dificultades del clásico (§2.2).
+        nav.pushNamed(Routes.difficulty, arguments: GameMode.fog);
       case GameMode.classic:
       default:
-        nav.pushNamed(Routes.difficulty);
+        nav.pushNamed(Routes.difficulty, arguments: GameMode.classic);
     }
   }
 

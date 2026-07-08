@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'core/constants/routes.dart';
 import 'core/theme/app_theme.dart';
+import 'domain/models/game_mode.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/settings_provider.dart';
 import 'ui/screens/custom_setup_screen.dart';
@@ -43,7 +44,8 @@ class MinexApp extends StatelessWidget {
       case Routes.modeSelect:
         return _slide(const ModeSelectScreen());
       case Routes.difficulty:
-        return _slide(const DifficultySelectScreen());
+        final mode = settings.arguments as GameMode? ?? GameMode.classic;
+        return _slide(DifficultySelectScreen(mode: mode));
       case Routes.customSetup:
         return _slide(const CustomSetupScreen());
       case Routes.game:

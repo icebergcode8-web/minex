@@ -61,6 +61,21 @@ GameConfig blitzConfig({int? seed}) => GameConfig(
       seed: seed,
     );
 
+/// Config del modo Niebla (plan §2.2): mismas dificultades del clásico, pero con
+/// visibilidad limitada. La lógica de ganar/perder es idéntica al clásico.
+GameConfig fogConfig(Difficulty difficulty, {int? seed}) {
+  assert(difficulty != Difficulty.custom, 'Niebla usa presets fijos');
+  final preset = kDifficultyPresets[difficulty]!;
+  return GameConfig(
+    mode: GameMode.fog,
+    rows: preset.rows,
+    cols: preset.cols,
+    mines: preset.mines,
+    lives: preset.lives,
+    seed: seed,
+  );
+}
+
 /// Construye un [GameConfig] clásico personalizado, validando los límites.
 GameConfig classicCustomConfig({
   required int rows,
