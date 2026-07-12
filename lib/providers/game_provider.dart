@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../core/constants/difficulty.dart';
 import '../data/repositories/records_repository.dart';
 import '../domain/engine/board_generator.dart';
+import '../domain/engine/liar_engine.dart';
 import '../domain/engine/minesweeper_engine.dart';
 import '../domain/engine/scoring.dart';
 import '../domain/models/board.dart';
@@ -57,7 +58,10 @@ class GameProvider extends ChangeNotifier {
 
   bool get isBlitz => config.mode == GameMode.blitz;
   bool get isFog => config.mode == GameMode.fog;
+  bool get isLiar => config.mode == GameMode.liar;
   bool get isClassicScored => config.mode == GameMode.classic;
+
+  static const _liarEngine = LiarEngine();
 
   // ── Estado observable ──────────────────────────────────────────────
   late Board _board;
@@ -106,6 +110,12 @@ class GameProvider extends ChangeNotifier {
   int get flashlightUntilEpochMs => _flashlightUntilEpochMs;
   int get flashlightCharges => _flashlightCharges;
 
+  // ── Mentiroso (plan §2.4) ──────────────────────────────────────────
+  int _scannerCharges = 3;
+  bool _scannerMode = false;
+  int get scannerCharges => _scannerCharges;
+  bool get scannerMode => _scannerMode;
+
   /// Se incrementa cada vez que empieza un tablero nuevo (nueva partida o
   /// siguiente tablero de Blitz). El BoardWidget lo usa para limpiar sus
   /// animaciones de revelado entre tableros.
@@ -152,6 +162,8 @@ class GameProvider extends ChangeNotifier {
     _fogFocusEpochMs = 0;
     _flashlightCharges = 1;
     _flashlightUntilEpochMs = 0;
+    _scannerCharges = 3;
+    _scannerMode = false;
     _stopwatch
       ..reset()
       ..stop();
@@ -184,6 +196,11 @@ class GameProvider extends ChangeNotifier {
   bool get _tapReveals => !_flagMode && !_invertControls;
 
   void onTap(int row, int col) {
+    // Mentiroso: con el Escáner activo, el toque escanea en vez de revelar.
+    if (isLiar && _scannerMode) {
+      _scan(row, col);
+      return;
+    }
     if (_tapReveals) {
       _reveal(row, col);
     } else {
@@ -232,6 +249,30 @@ class GameProvider extends ChangeNotifier {
     _flashlightCharges--;
     _flashlightUntilEpochMs =
         DateTime.now().millisecondsSinceEpoch + _flashlightMs;
+    notifyListeners();
+  }
+
+  /// Mentiroso: activa/desactiva el modo Escáner. Con él activo, el siguiente
+  /// toque sobre una celda mentirosa revelada muestra su número real (§2.4).
+  void toggleScanner() {
+    if (!isLiar || _scannerCharges <= 0 || _status != GameStatus.playing) {
+      return;
+    }
+    _scannerMode = !_scannerMode;
+    notifyListeners();
+  }
+
+  /// Ítem Escáner de verdad (§3.1): corrige una celda mentirosa revelada,
+  /// mostrando su número real y quitando la marca. Consume 1 carga. Tocar otra
+  /// cosa solo cancela el modo Escáner (sin gastar carga).
+  void _scan(int row, int col) {
+    final cell = _board.cellAt(row, col);
+    if (cell.isRevealed && cell.isLiar) {
+      cell.displayedNumber = cell.adjacentMines;
+      cell.isLiar = false;
+      _scannerCharges--;
+    }
+    _scannerMode = false;
     notifyListeners();
   }
 
@@ -316,6 +357,14 @@ class GameProvider extends ChangeNotifier {
     }
     _board = generated;
     _minesPlaced = true;
+
+    // Mentiroso (§2.4): tras generar, marcar ~15% de números como mentirosos.
+    if (isLiar) {
+      _liarEngine.applyLies(
+        _board,
+        seed: config.seed ?? DateTime.now().millisecondsSinceEpoch,
+      );
+    }
   }
 
   // ── Cronómetro / estados ──────────────────────────────────────────

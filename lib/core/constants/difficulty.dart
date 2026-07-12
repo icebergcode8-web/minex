@@ -76,6 +76,29 @@ GameConfig fogConfig(Difficulty difficulty, {int? seed}) {
   );
 }
 
+/// Dificultades disponibles para Mentiroso (plan §2.4): Medio en adelante.
+const List<Difficulty> kLiarDifficulties = [
+  Difficulty.medium,
+  Difficulty.hard,
+  Difficulty.expert,
+];
+
+/// Config del modo Mentiroso (plan §2.4): presets del clásico desde Medio. La
+/// capa de mentiras la aplica `LiarEngine` tras generar el tablero.
+GameConfig liarConfig(Difficulty difficulty, {int? seed}) {
+  assert(kLiarDifficulties.contains(difficulty),
+      'Mentiroso solo está disponible de Medio en adelante');
+  final preset = kDifficultyPresets[difficulty]!;
+  return GameConfig(
+    mode: GameMode.liar,
+    rows: preset.rows,
+    cols: preset.cols,
+    mines: preset.mines,
+    lives: preset.lives,
+    seed: seed,
+  );
+}
+
 /// Construye un [GameConfig] clásico personalizado, validando los límites.
 GameConfig classicCustomConfig({
   required int rows,

@@ -63,6 +63,13 @@ class GameTopHud extends StatelessWidget {
               charges: gp.flashlightCharges,
               onTap: gp.useFlashlight,
             )
+          else if (gp.isLiar)
+            _ItemButton(
+              emoji: '🔍',
+              charges: gp.scannerCharges,
+              active: gp.scannerMode,
+              onTap: gp.toggleScanner,
+            )
           else
             const SizedBox(width: 40),
         ],
@@ -189,11 +196,15 @@ class _ItemButton extends StatelessWidget {
     required this.emoji,
     required this.charges,
     required this.onTap,
+    this.active = false,
   });
 
   final String emoji;
   final int charges;
   final VoidCallback onTap;
+
+  /// Resalta el botón cuando el ítem es un modo activo (p. ej. Escáner armado).
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
@@ -202,12 +213,20 @@ class _ItemButton extends StatelessWidget {
     return Opacity(
       opacity: enabled ? 1 : 0.4,
       child: Material(
-        color: palette.surface,
+        color: active
+            ? palette.secondary.withValues(alpha: 0.18)
+            : palette.surface,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: enabled ? onTap : null,
-          child: Padding(
+          child: Container(
+            decoration: active
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: palette.secondary, width: 2),
+                  )
+                : null,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
             child: Row(
               mainAxisSize: MainAxisSize.min,

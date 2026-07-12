@@ -45,7 +45,7 @@
 ## 🕹️ Fase 4 — Modos nuevos (en este orden de complejidad)
 - [x] **Blitz** (`scoring.dart` con combos + tests, cronómetro descendente, +20s, regen de tablero, HUD combo, ítem Congelador) — jugable desde ModeSelect
 - [x] **Niebla** (`fog_engine.dart` puro + tests, radio de visibilidad con fade por reloj de pared, overlay en el painter, ítem Linterna 5s) — jugable con dificultades del clásico. _Puntaje ×1.5 y récords propios → Fase 5 (economía)_
-- [ ] **Mentiroso** (`liar_engine.dart`, ±1 con marca sutil, ítem Escáner)
+- [x] **Mentiroso** (`liar_engine.dart` puro + tests, 15% mienten ±1, marca de esquina doblada en el painter, ítem Escáner 3 cargas) — solo Medio+. _Puntaje ×2 → Fase 5 (economía)_
 - [ ] **Oleadas** (`waves_engine.dart`, mejoras roguelike, modificadores, 3 vidas, **savegame serializado**)
 
 ## 🏆 Fase 5 — Economía (punto de publicación recomendado)

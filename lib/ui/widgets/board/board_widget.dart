@@ -478,7 +478,33 @@ class _BoardPainter extends CustomPainter {
     } else if (cell.adjacentMines > 0) {
       _paintNumber(canvas, cell, rect, e);
     }
+    // Mentiroso (§2.4): marca sutil de esquina doblada en celdas que mienten.
+    if (cell.isLiar) _paintLiarMark(canvas, inner, e);
     canvas.restore();
+  }
+
+  /// Esquina superior derecha "doblada" (como página de libro) que señala una
+  /// celda mentirosa sin revelar en qué dirección miente (§2.4).
+  void _paintLiarMark(Canvas canvas, Rect inner, double t) {
+    final s = cellSize * 0.26;
+    final tr = inner.topRight;
+    final fold = Path()
+      ..moveTo(tr.dx - s, tr.dy)
+      ..lineTo(tr.dx, tr.dy)
+      ..lineTo(tr.dx, tr.dy + s)
+      ..close();
+    canvas.drawPath(
+      fold,
+      Paint()..color = palette.secondary.withValues(alpha: 0.85 * t),
+    );
+    // Pliegue interior para dar sensación de doblez.
+    canvas.drawLine(
+      Offset(tr.dx - s, tr.dy),
+      Offset(tr.dx, tr.dy + s),
+      Paint()
+        ..color = palette.surfaceLow.withValues(alpha: 0.7 * t)
+        ..strokeWidth = cellSize * 0.03,
+    );
   }
 
   void _paintNumber(Canvas canvas, Cell cell, Rect rect, double t) {

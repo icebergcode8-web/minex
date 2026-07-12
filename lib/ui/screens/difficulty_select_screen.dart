@@ -21,7 +21,7 @@ class DifficultySelectScreen extends StatelessWidget {
 
   final GameMode mode;
 
-  static const _order = [
+  static const _classicOrder = [
     Difficulty.easy,
     Difficulty.medium,
     Difficulty.hard,
@@ -36,17 +36,30 @@ class DifficultySelectScreen extends StatelessWidget {
         Difficulty.custom => l.difficultyExpert,
       };
 
-  bool get _isFog => mode == GameMode.fog;
+  bool get _isLiar => mode == GameMode.liar;
 
-  GameConfig _configFor(Difficulty d) =>
-      _isFog ? fogConfig(d) : classicConfig(d);
+  /// Dificultades ofrecidas según el modo. Mentiroso solo Medio+ (§2.4).
+  List<Difficulty> get _order =>
+      _isLiar ? kLiarDifficulties : _classicOrder;
+
+  GameConfig _configFor(Difficulty d) => switch (mode) {
+        GameMode.fog => fogConfig(d),
+        GameMode.liar => liarConfig(d),
+        _ => classicConfig(d),
+      };
+
+  String _title(AppLocalizations l) => switch (mode) {
+        GameMode.fog => l.modeFog,
+        GameMode.liar => l.modeLiar,
+        _ => l.classicMode,
+      };
 
   @override
   Widget build(BuildContext context) {
     final records = context.read<RecordsRepository>();
     final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(_isFog ? l.modeFog : l.classicMode)),
+      appBar: AppBar(title: Text(_title(l))),
       body: AppBackground(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -57,8 +70,10 @@ class DifficultySelectScreen extends StatelessWidget {
                 child: _DifficultyCard(
                   label: _label(l, d),
                   preset: kDifficultyPresets[d]!,
-                  // Niebla no persiste récords por dificultad (Fase 5).
-                  bestTimeMs: _isFog ? null : records.bestTimeMs(d),
+                  // Solo el Clásico persiste récords por dificultad (Fase 5).
+                  bestTimeMs: mode == GameMode.classic
+                      ? records.bestTimeMs(d)
+                      : null,
                   onTap: () {
                     Navigator.of(context).pushNamed(
                       Routes.game,
@@ -71,7 +86,7 @@ class DifficultySelectScreen extends StatelessWidget {
                 ),
               ),
             // Tablero personalizado: solo en Clásico (§2.1).
-            if (!_isFog)
+            if (mode == GameMode.classic)
               _CustomCard(
                 label: l.difficultyCustom,
                 onTap: () =>

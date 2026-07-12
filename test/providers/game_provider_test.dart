@@ -231,4 +231,57 @@ void main() {
       gp.dispose();
     });
   });
+
+  group('Mentiroso (§2.4)', () {
+    GameProvider newLiar() => GameProvider(
+          config: liarConfig(Difficulty.medium, seed: 5),
+          difficulty: Difficulty.medium,
+          records: FakeRecordsRepository(),
+        );
+
+    test('generar el tablero aplica mentiras (±1 del real)', () {
+      final gp = newLiar();
+      expect(gp.isLiar, isTrue);
+      gp.onTap(0, 0);
+      final liars = gp.board.cells.where((c) => c.isLiar).toList();
+      expect(liars, isNotEmpty);
+      for (final c in liars) {
+        expect((c.displayedNumber! - c.adjacentMines).abs(), 1);
+      }
+      gp.dispose();
+    });
+
+    test('el Escáner corrige una celda mentirosa y consume carga', () {
+      final gp = newLiar();
+      gp.onTap(0, 0);
+      // Revelar celdas seguras hasta que una mentirosa quede a la vista.
+      int? lr, lc;
+      for (final cell in gp.board.cells.toList()) {
+        if (!cell.hasMine && !cell.isRevealed) {
+          gp.onTap(cell.row, cell.col);
+        }
+        final revealed =
+            gp.board.cells.where((c) => c.isRevealed && c.isLiar);
+        if (revealed.isNotEmpty) {
+          lr = revealed.first.row;
+          lc = revealed.first.col;
+          break;
+        }
+        if (gp.status != GameStatus.playing) break;
+      }
+      expect(lr, isNotNull, reason: 'debe haber una mentirosa revelada');
+      expect(gp.status, GameStatus.playing);
+      expect(gp.scannerCharges, 3);
+
+      gp.toggleScanner();
+      expect(gp.scannerMode, isTrue);
+      gp.onTap(lr!, lc!); // escanea
+      expect(gp.scannerCharges, 2);
+      expect(gp.scannerMode, isFalse);
+      final cell = gp.board.cellAt(lr, lc);
+      expect(cell.isLiar, isFalse);
+      expect(cell.displayedNumber, cell.adjacentMines); // ya dice la verdad
+      gp.dispose();
+    });
+  });
 }

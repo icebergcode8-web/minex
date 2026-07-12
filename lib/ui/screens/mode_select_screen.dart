@@ -51,6 +51,9 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
       case GameMode.fog:
         // Niebla usa las dificultades del clásico (§2.2).
         nav.pushNamed(Routes.difficulty, arguments: GameMode.fog);
+      case GameMode.liar:
+        // Mentiroso: dificultades de Medio en adelante (§2.4).
+        nav.pushNamed(Routes.difficulty, arguments: GameMode.liar);
       case GameMode.classic:
       default:
         nav.pushNamed(Routes.difficulty, arguments: GameMode.classic);
