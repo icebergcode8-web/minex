@@ -15,6 +15,7 @@ import '../domain/models/board.dart';
 import '../domain/models/cell.dart';
 import '../domain/models/game_config.dart';
 import '../domain/models/game_mode.dart';
+import '../domain/models/game_outcome.dart';
 import '../domain/models/game_status.dart';
 import '../domain/models/wave_modifier.dart';
 
@@ -33,12 +34,22 @@ class GameProvider extends ChangeNotifier {
     SavegameRepository? savegame,
     bool resumeWaves = false,
     bool invertControls = false,
+    bool isDaily = false,
+    int bonusFlashlight = 0,
+    int bonusFreezer = 0,
+    int bonusScanner = 0,
+    void Function(GameOutcome outcome)? onGameEnd,
     WaveModifier? debugForceModifier,
     BoardGenerator generator = const BoardGenerator(),
     MinesweeperEngine engine = const MinesweeperEngine(),
   })  : _records = records,
         _savegameRepo = savegame,
         _invertControls = invertControls,
+        _isDaily = isDaily,
+        _bonusFlashlight = bonusFlashlight,
+        _bonusFreezer = bonusFreezer,
+        _bonusScanner = bonusScanner,
+        _onGameEnd = onGameEnd,
         _debugForceModifier = debugForceModifier,
         _generator = generator,
         _engine = engine {
@@ -62,6 +73,21 @@ class GameProvider extends ChangeNotifier {
   final BoardGenerator _generator;
   final MinesweeperEngine _engine;
   final bool _invertControls;
+
+  /// La partida es un Reto Diario (plan §2.7): afecta a las monedas/racha.
+  final bool _isDaily;
+
+  /// Cargas iniciales extra provenientes de consumibles de la tienda (§3.1).
+  final int _bonusFlashlight;
+  final int _bonusFreezer;
+  final int _bonusScanner;
+
+  /// Se invoca al terminar la partida con la instantánea del resultado, para
+  /// que la capa de UI otorgue monedas/logros (economía, Fase 5).
+  final void Function(GameOutcome outcome)? _onGameEnd;
+
+  /// `true` si el jugador puso al menos una bandera (logro "sin banderas").
+  bool _usedAnyFlag = false;
 
   /// Fuerza un modificador de oleada (solo tests); si es `null`, se sortea.
   final WaveModifier? _debugForceModifier;
@@ -212,14 +238,16 @@ class GameProvider extends ChangeNotifier {
     boardGeneration++;
     _scoring.reset();
     _timeBudgetMs = _blitzBudgetMs;
-    _freezerCharges = 1;
+    // Cargas base + extra de consumibles comprados en la tienda (§3.1).
+    _freezerCharges = 1 + _bonusFreezer;
     _timeUp = false;
+    _usedAnyFlag = false;
     _fogFocusRow = -1;
     _fogFocusCol = -1;
     _fogFocusEpochMs = 0;
-    _flashlightCharges = 1;
+    _flashlightCharges = 1 + _bonusFlashlight;
     _flashlightUntilEpochMs = 0;
-    _scannerCharges = 3;
+    _scannerCharges = 3 + _bonusScanner;
     _scannerMode = false;
     _stopwatch
       ..reset()
@@ -454,6 +482,7 @@ class GameProvider extends ChangeNotifier {
         _records.recordWaves(_wavesScore);
         _isNewRecord = _wavesScore > prev;
         _savegameRepo?.clearWaves();
+        _emitOutcome(won: false);
         notifyListeners();
         return;
       }
@@ -685,6 +714,7 @@ class GameProvider extends ChangeNotifier {
     if (isTerminal || _status == GameStatus.paused) return;
     // Permitir marcar antes del primer revelado (aún sin minas colocadas).
     _engine.toggleFlag(_board, row, col);
+    if (_board.cellAt(row, col).isFlagged) _usedAnyFlag = true;
     if (isWaves) _persistWaves(); // banderas también en el savegame exacto
     notifyListeners();
   }
@@ -730,6 +760,24 @@ class GameProvider extends ChangeNotifier {
     if (isBlitz) elapsed.value = Duration(milliseconds: _remainingMs);
   }
 
+  /// Construye la instantánea del resultado para la economía/logros (§3.2).
+  GameOutcome _buildOutcome({required bool won}) => GameOutcome(
+        mode: config.mode,
+        difficulty: difficulty,
+        won: won,
+        elapsed: elapsed.value,
+        timeUp: _timeUp,
+        usedFlags: _usedAnyFlag,
+        blitzScore: _scoring.score,
+        blitzBoards: _scoring.boardsSolved,
+        wavesReached: _wave,
+        wavesScore: _wavesScore,
+        isDaily: _isDaily,
+      );
+
+  void _emitOutcome({required bool won}) =>
+      _onGameEnd?.call(_buildOutcome(won: won));
+
   void _finish(GameStatus status) {
     _status = status;
     _stopwatch.stop();
@@ -737,6 +785,7 @@ class GameProvider extends ChangeNotifier {
 
     if (isBlitz) {
       _isNewRecord = _finishBlitz();
+      _emitOutcome(won: false);
       notifyListeners();
       return;
     }
@@ -763,6 +812,7 @@ class GameProvider extends ChangeNotifier {
         );
       }
     }
+    _emitOutcome(won: status == GameStatus.won);
     notifyListeners();
   }
 

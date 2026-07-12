@@ -50,11 +50,12 @@
 - [x] **Modificadores de oleada ≥5** (§2.5): minas encadenadas (`generateChained`), niebla parcial (reusa FogEngine), 5% números mentirosos (reusa LiarEngine), minas con retardo (`injectMines` a mitad de oleada + aviso) — con tests.
 - [x] **Savegame a nivel de tablero exacto** (§6.2): `Board.toMap/fromMap` + `Cell.toMap/fromMap` (serialización pura), persistencia tras cada revelado/bandera y restauración exacta (celdas, banderas, minas inyectadas, modificador y pantalla de mejora) — "kill+reabrir restaura Oleadas" tal cual estaba (§12), con tests de round-trip.
 
-## 🏆 Fase 5 — Economía (punto de publicación recomendado)
-- [ ] Monedas + `EconomyProvider`/`EconomyRepo`
-- [ ] Tienda offline (ítems, skins tablero, skins piezas)
-- [ ] Sistema de ~30 logros + `AchievementsRepo`
-- [ ] Reto Diario (seed por fecha, rotación de modo, racha) + `DailyRepo`
+## 🏆 Fase 5 — Economía (punto de publicación recomendado) ✅
+- [x] **Monedas** + `EconomyProvider`/`EconomyRepository` (economyBox) — `economy_engine.dart` puro calcula recompensas por modo/dificultad (Niebla ×1.5, Mentiroso ×2, Reto Diario ×2) + tests. `GameProvider` emite `GameOutcome` al terminar; `GameScreen` orquesta el otorgado (monedas + racha + logros) y el `ResultOverlay` muestra "+monedas" y logros nuevos.
+- [x] **Tienda offline** (`ShopScreen`, 3 pestañas): recargas de ítems (Linterna/Congelador/Escáner → cargas iniciales extra vía inventario), **skins de tablero** (6, `core/theme/skins.dart`) y **skins de piezas** (4). Compra/equipa con monedas; el `BoardWidget` pinta la skin equipada. _Ítems no usables en Clásico (récords puros) — solo cargan en su modo._
+- [x] **~30 logros** + `AchievementsRepository` (achievementsBox) — `achievements_catalog.dart` puro (predicados sobre `AchievementContext`) + `AchievementsProvider` que ensambla el contexto desde los repos, desbloquea y devuelve monedas. `AchievementsScreen` con progreso. Con tests.
+- [x] **Reto Diario** (`DailyEngine` puro: seed `yyyyMMdd`, rotación de modo lun→dom, fallback torre→clásico hasta F6) + `DailyRepository` (dailyBox) + `DailyProvider` (reloj inyectable) con **racha** y recompensas crecientes (cofre al día 7). `DailyChallengeScreen` + tarjeta y racha 🔥 en Home. Con tests. _Reintento vía rewarded ad → Fase 3 (Ads)._
+  - _Pendiente menor: desbloqueo progresivo de modos (§8.3: Mentiroso 5 victorias / 3D 10) — hoy todos accesibles._
 
 ## 🧊 Fase 6 — Modo 3D (update 1.1)
 - [ ] `tower_engine.dart` (conteo con 9 vecinas incluyendo celda inferior) + su unit test

@@ -135,5 +135,57 @@
   "settingsVersion": "Version",
 
   "navStats": "Statistics",
-  "navSettings": "Settings"
+  "navSettings": "Settings",
+  "navShop": "Shop",
+  "navAchievements": "Achievements",
+  "navDaily": "Daily Challenge",
+
+  "coinsLabel": "Coins",
+  "shopTitle": "Shop",
+  "shopTabItems": "Items",
+  "shopTabBoards": "Board",
+  "shopTabPieces": "Pieces",
+  "shopBuy": "Buy",
+  "shopEquip": "Equip",
+  "shopEquipped": "Equipped",
+  "shopOwned": "Owned",
+  "shopInStock": "In stock: {count}",
+  "@shopInStock": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "shopNotEnough": "Not enough coins",
+  "shopPurchased": "Purchased!",
+  "shopEquippedMsg": "Equipped",
+
+  "achievementsTitle": "Achievements",
+  "achievementsProgress": "{unlocked}/{total} unlocked",
+  "@achievementsProgress": {
+    "placeholders": {
+      "unlocked": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "achievementReward": "+{coins}",
+  "@achievementReward": {
+    "placeholders": { "coins": { "type": "int" } }
+  },
+  "achievementUnlocked": "Achievement unlocked!",
+
+  "dailyTitle": "Daily Challenge",
+  "dailyTodayMode": "Today's mode",
+  "dailyPlay": "Play challenge",
+  "dailyDoneToday": "Today's challenge complete!",
+  "dailyStreakLabel": "Streak",
+  "dailyBestStreak": "Best streak",
+  "dailyCompletedTotal": "Completed",
+  "streakDays": "{days} days",
+  "@streakDays": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "dailyBadge": "TODAY",
+
+  "resultCoins": "+{coins} coins",
+  "@resultCoins": {
+    "placeholders": { "coins": { "type": "int" } }
+  }
 }

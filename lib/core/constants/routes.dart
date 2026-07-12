@@ -10,6 +10,9 @@ abstract final class Routes {
   static const game = '/game';
   static const stats = '/stats';
   static const settings = '/settings';
+  static const shop = '/shop';
+  static const achievements = '/achievements';
+  static const daily = '/daily';
 }
 
 /// Argumentos para lanzar una partida.
@@ -18,6 +21,7 @@ class GameArgs {
     required this.config,
     required this.difficulty,
     this.resumeWaves = false,
+    this.isDaily = false,
   });
 
   final GameConfig config;
@@ -25,4 +29,7 @@ class GameArgs {
 
   /// Oleadas: si `true`, reanuda la run guardada en vez de empezar de cero.
   final bool resumeWaves;
+
+  /// La partida es el Reto Diario (plan §2.7): monedas dobles + racha.
+  final bool isDaily;
 }

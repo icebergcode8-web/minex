@@ -6,12 +6,15 @@ import 'core/theme/app_theme.dart';
 import 'domain/models/game_mode.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/settings_provider.dart';
+import 'ui/screens/achievements_screen.dart';
 import 'ui/screens/custom_setup_screen.dart';
+import 'ui/screens/daily_challenge_screen.dart';
 import 'ui/screens/difficulty_select_screen.dart';
 import 'ui/screens/game_screen.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/mode_select_screen.dart';
 import 'ui/screens/settings_screen.dart';
+import 'ui/screens/shop_screen.dart';
 import 'ui/screens/stats_screen.dart';
 
 /// Raíz de la app: MaterialApp, temas claro/oscuro/sistema, idioma y rutas
@@ -55,6 +58,12 @@ class MinexApp extends StatelessWidget {
         return _slide(const StatsScreen());
       case Routes.settings:
         return _slide(const SettingsScreen());
+      case Routes.shop:
+        return _slide(const ShopScreen());
+      case Routes.achievements:
+        return _slide(const AchievementsScreen());
+      case Routes.daily:
+        return _slide(const DailyChallengeScreen());
       default:
         return _fade(const HomeScreen());
     }

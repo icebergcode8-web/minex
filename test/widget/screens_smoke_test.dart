@@ -7,10 +7,14 @@ import 'package:minex/core/constants/difficulty.dart';
 import 'package:minex/core/constants/routes.dart';
 import 'package:minex/core/haptics/haptics_service.dart';
 import 'package:minex/data/local/hive_service.dart';
+import 'package:minex/data/repositories/economy_repository.dart';
 import 'package:minex/data/repositories/records_repository.dart';
 import 'package:minex/data/repositories/savegame_repository.dart';
 import 'package:minex/data/repositories/settings_repository.dart';
+import 'package:minex/domain/models/board_skin.dart';
+import 'package:minex/domain/models/piece_skin.dart';
 import 'package:minex/l10n/app_localizations.dart';
+import 'package:minex/providers/economy_provider.dart';
 import 'package:minex/ui/screens/custom_setup_screen.dart';
 import 'package:minex/ui/screens/difficulty_select_screen.dart';
 import 'package:minex/ui/screens/game_screen.dart';
@@ -50,6 +54,23 @@ class FakeSavegameRepository extends SavegameRepository {
   Future<void> clearWaves() async {}
 }
 
+/// Economía en memoria: skins por defecto, sin monedas ni consumibles.
+class FakeEconomyRepository extends EconomyRepository {
+  FakeEconomyRepository() : super(HiveService());
+  @override
+  int get coins => 0;
+  @override
+  int consumableCount(String id) => 0;
+  @override
+  Set<String> get ownedBoardSkins => {BoardSkin.classic.id};
+  @override
+  Set<String> get ownedPieceSkins => {PieceSkin.classic.id};
+  @override
+  String get equippedBoardSkinId => BoardSkin.classic.id;
+  @override
+  String get equippedPieceSkinId => PieceSkin.classic.id;
+}
+
 Widget _wrap(Widget child) => MultiProvider(
       providers: [
         Provider<RecordsRepository>.value(value: FakeRecordsRepository()),
@@ -57,6 +78,9 @@ Widget _wrap(Widget child) => MultiProvider(
         Provider<AudioService>.value(value: AudioService()),
         Provider<HapticsService>.value(value: HapticsService()),
         Provider<SavegameRepository>.value(value: FakeSavegameRepository()),
+        ChangeNotifierProvider<EconomyProvider>(
+          create: (_) => EconomyProvider(FakeEconomyRepository()),
+        ),
       ],
       child: MaterialApp(
         locale: const Locale('es'),

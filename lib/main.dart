@@ -6,9 +6,15 @@ import 'app.dart';
 import 'core/audio/audio_service.dart';
 import 'core/haptics/haptics_service.dart';
 import 'data/local/hive_service.dart';
+import 'data/repositories/achievements_repository.dart';
+import 'data/repositories/daily_repository.dart';
+import 'data/repositories/economy_repository.dart';
 import 'data/repositories/records_repository.dart';
 import 'data/repositories/savegame_repository.dart';
 import 'data/repositories/settings_repository.dart';
+import 'providers/achievements_provider.dart';
+import 'providers/daily_provider.dart';
+import 'providers/economy_provider.dart';
 import 'providers/settings_provider.dart';
 
 Future<void> main() async {
@@ -27,6 +33,10 @@ Future<void> main() async {
   await hive.init();
 
   final settingsRepo = SettingsRepository(hive);
+  final recordsRepo = RecordsRepository(hive);
+  final economyRepo = EconomyRepository(hive);
+  final achievementsRepo = AchievementsRepository(hive);
+  final dailyRepo = DailyRepository(hive);
   final audio = AudioService();
   final haptics = HapticsService();
 
@@ -35,8 +45,11 @@ Future<void> main() async {
       providers: [
         Provider<HiveService>.value(value: hive),
         Provider<SettingsRepository>.value(value: settingsRepo),
-        Provider<RecordsRepository>(create: (_) => RecordsRepository(hive)),
+        Provider<RecordsRepository>.value(value: recordsRepo),
         Provider<SavegameRepository>(create: (_) => SavegameRepository(hive)),
+        Provider<EconomyRepository>.value(value: economyRepo),
+        Provider<AchievementsRepository>.value(value: achievementsRepo),
+        Provider<DailyRepository>.value(value: dailyRepo),
         Provider<AudioService>.value(value: audio),
         Provider<HapticsService>.value(value: haptics),
         ChangeNotifierProvider<SettingsProvider>(
@@ -44,6 +57,20 @@ Future<void> main() async {
             repo: settingsRepo,
             audio: audio,
             haptics: haptics,
+          ),
+        ),
+        ChangeNotifierProvider<EconomyProvider>(
+          create: (_) => EconomyProvider(economyRepo),
+        ),
+        ChangeNotifierProvider<DailyProvider>(
+          create: (_) => DailyProvider(repo: dailyRepo),
+        ),
+        ChangeNotifierProvider<AchievementsProvider>(
+          create: (_) => AchievementsProvider(
+            repo: achievementsRepo,
+            records: recordsRepo,
+            economy: economyRepo,
+            daily: dailyRepo,
           ),
         ),
       ],

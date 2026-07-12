@@ -148,5 +148,57 @@
   "settingsVersion": "Versión",
 
   "navStats": "Estadísticas",
-  "navSettings": "Ajustes"
+  "navSettings": "Ajustes",
+  "navShop": "Tienda",
+  "navAchievements": "Logros",
+  "navDaily": "Reto Diario",
+
+  "coinsLabel": "Monedas",
+  "shopTitle": "Tienda",
+  "shopTabItems": "Ítems",
+  "shopTabBoards": "Tablero",
+  "shopTabPieces": "Piezas",
+  "shopBuy": "Comprar",
+  "shopEquip": "Equipar",
+  "shopEquipped": "Equipada",
+  "shopOwned": "Comprada",
+  "shopInStock": "En inventario: {count}",
+  "@shopInStock": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "shopNotEnough": "Monedas insuficientes",
+  "shopPurchased": "¡Comprado!",
+  "shopEquippedMsg": "Equipada",
+
+  "achievementsTitle": "Logros",
+  "achievementsProgress": "{unlocked}/{total} desbloqueados",
+  "@achievementsProgress": {
+    "placeholders": {
+      "unlocked": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "achievementReward": "+{coins}",
+  "@achievementReward": {
+    "placeholders": { "coins": { "type": "int" } }
+  },
+  "achievementUnlocked": "¡Logro desbloqueado!",
+
+  "dailyTitle": "Reto Diario",
+  "dailyTodayMode": "Modo de hoy",
+  "dailyPlay": "Jugar reto",
+  "dailyDoneToday": "¡Reto de hoy completado!",
+  "dailyStreakLabel": "Racha",
+  "dailyBestStreak": "Mejor racha",
+  "dailyCompletedTotal": "Completados",
+  "streakDays": "{days} días",
+  "@streakDays": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "dailyBadge": "HOY",
+
+  "resultCoins": "+{coins} monedas",
+  "@resultCoins": {
+    "placeholders": { "coins": { "type": "int" } }
+  }
 }

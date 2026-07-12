@@ -7,10 +7,12 @@ import 'package:provider/provider.dart';
 import '../../../core/audio/audio_service.dart';
 import '../../../core/haptics/haptics_service.dart';
 import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/skins.dart';
 import '../../../domain/engine/fog_engine.dart';
 import '../../../domain/models/board.dart';
 import '../../../domain/models/cell.dart';
 import '../../../domain/models/game_status.dart';
+import '../../../providers/economy_provider.dart';
 import '../../../providers/game_provider.dart';
 
 /// Renderiza el tablero en un solo `CustomPaint` (plan §5.2) y traduce los
@@ -261,7 +263,10 @@ class _BoardWidgetState extends State<BoardWidget>
   @override
   Widget build(BuildContext context) {
     final gp = context.watch<GameProvider>();
-    final palette = context.palette;
+    final economy = context.watch<EconomyProvider>();
+    // Skin de tablero/piezas equipada (plan §3.2).
+    final palette = boardPaletteFor(economy.equippedBoardSkin, context.palette);
+    final piece = pieceColorsFor(economy.equippedPieceSkin, palette);
     _syncAnimations(gp);
 
     final board = gp.board;
@@ -297,6 +302,8 @@ class _BoardWidgetState extends State<BoardWidget>
                       repaint: Listenable.merge([_frame, _shake]),
                       board: board,
                       palette: palette,
+                      flagColor: piece.flag,
+                      mineColor: piece.mine,
                       cellSize: cellSize,
                       revealProgress: _revealProgress,
                       flagProgress: _flagProgress,
@@ -371,6 +378,8 @@ class _BoardPainter extends CustomPainter {
     required Listenable repaint,
     required this.board,
     required this.palette,
+    required this.flagColor,
+    required this.mineColor,
     required this.cellSize,
     required this.revealProgress,
     required this.flagProgress,
@@ -383,6 +392,11 @@ class _BoardPainter extends CustomPainter {
 
   final Board board;
   final BoardPalette palette;
+
+  /// Colores de las piezas según la skin equipada (plan §3.2).
+  final Color flagColor;
+  final Color mineColor;
+
   final double cellSize;
   final double Function(int index) revealProgress;
   final double Function(int index) flagProgress;
@@ -531,7 +545,7 @@ class _BoardPainter extends CustomPainter {
     final c = rect.center;
     final r = cellSize * 0.24;
     final paint = Paint()
-      ..color = exploded ? palette.onAccent : palette.danger;
+      ..color = exploded ? palette.onAccent : mineColor;
     // Cuerpo + púas simples (vectorial, plan §5.1).
     canvas.drawCircle(c, r, paint);
     final spike = Paint()
@@ -571,7 +585,7 @@ class _BoardPainter extends CustomPainter {
       ..lineTo(poleX + cellSize * 0.28, top + cellSize * 0.12)
       ..lineTo(poleX, top + cellSize * 0.24)
       ..close();
-    canvas.drawPath(flag, Paint()..color = palette.secondary);
+    canvas.drawPath(flag, Paint()..color = flagColor);
     canvas.restore();
   }
 

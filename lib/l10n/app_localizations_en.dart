@@ -327,4 +327,104 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navSettings => 'Settings';
+
+  @override
+  String get navShop => 'Shop';
+
+  @override
+  String get navAchievements => 'Achievements';
+
+  @override
+  String get navDaily => 'Daily Challenge';
+
+  @override
+  String get coinsLabel => 'Coins';
+
+  @override
+  String get shopTitle => 'Shop';
+
+  @override
+  String get shopTabItems => 'Items';
+
+  @override
+  String get shopTabBoards => 'Board';
+
+  @override
+  String get shopTabPieces => 'Pieces';
+
+  @override
+  String get shopBuy => 'Buy';
+
+  @override
+  String get shopEquip => 'Equip';
+
+  @override
+  String get shopEquipped => 'Equipped';
+
+  @override
+  String get shopOwned => 'Owned';
+
+  @override
+  String shopInStock(int count) {
+    return 'In stock: $count';
+  }
+
+  @override
+  String get shopNotEnough => 'Not enough coins';
+
+  @override
+  String get shopPurchased => 'Purchased!';
+
+  @override
+  String get shopEquippedMsg => 'Equipped';
+
+  @override
+  String get achievementsTitle => 'Achievements';
+
+  @override
+  String achievementsProgress(int unlocked, int total) {
+    return '$unlocked/$total unlocked';
+  }
+
+  @override
+  String achievementReward(int coins) {
+    return '+$coins';
+  }
+
+  @override
+  String get achievementUnlocked => 'Achievement unlocked!';
+
+  @override
+  String get dailyTitle => 'Daily Challenge';
+
+  @override
+  String get dailyTodayMode => 'Today\'s mode';
+
+  @override
+  String get dailyPlay => 'Play challenge';
+
+  @override
+  String get dailyDoneToday => 'Today\'s challenge complete!';
+
+  @override
+  String get dailyStreakLabel => 'Streak';
+
+  @override
+  String get dailyBestStreak => 'Best streak';
+
+  @override
+  String get dailyCompletedTotal => 'Completed';
+
+  @override
+  String streakDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get dailyBadge => 'TODAY';
+
+  @override
+  String resultCoins(int coins) {
+    return '+$coins coins';
+  }
 }

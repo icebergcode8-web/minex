@@ -5,6 +5,7 @@ import 'package:minex/data/repositories/records_repository.dart';
 import 'package:minex/data/repositories/savegame_repository.dart';
 import 'package:minex/domain/models/game_config.dart';
 import 'package:minex/domain/models/game_mode.dart';
+import 'package:minex/domain/models/game_outcome.dart';
 import 'package:minex/domain/models/game_status.dart';
 import 'package:minex/domain/models/wave_modifier.dart';
 import 'package:minex/providers/game_provider.dart';
@@ -123,6 +124,31 @@ void main() {
       }
     }
     expect(gp.status, GameStatus.won);
+    gp.dispose();
+  });
+
+  test('emite GameOutcome al terminar (economía, Fase 5)', () {
+    GameOutcome? emitted;
+    final gp = GameProvider(
+      config: config,
+      difficulty: Difficulty.easy,
+      records: FakeRecordsRepository(),
+      isDaily: true,
+      onGameEnd: (o) => emitted = o,
+    );
+    gp.onTap(0, 0);
+    for (final cell in gp.board.cells) {
+      if (!cell.hasMine && !cell.isRevealed) {
+        gp.onTap(cell.row, cell.col);
+      }
+    }
+    expect(gp.status, GameStatus.won);
+    expect(emitted, isNotNull);
+    expect(emitted!.won, isTrue);
+    expect(emitted!.mode, GameMode.classic);
+    expect(emitted!.difficulty, Difficulty.easy);
+    expect(emitted!.isDaily, isTrue);
+    expect(emitted!.isSuccess, isTrue);
     gp.dispose();
   });
 
@@ -522,7 +548,11 @@ void main() {
           }
         }
         expect(injected, isTrue);
-        expect(gp.board.cells.where((c) => c.hasMine).length, initial + 3);
+        // Inyecta hasta 3 minas; si la cascada dejó pocas celdas ocultas,
+        // convierte las que haya disponibles (tablero 7×7 sin semilla fija).
+        final after = gp.board.cells.where((c) => c.hasMine).length;
+        expect(after, greaterThan(initial));
+        expect(after, lessThanOrEqualTo(initial + 3));
         expect(gp.waveWarningActive, isTrue);
         gp.dispose();
       });

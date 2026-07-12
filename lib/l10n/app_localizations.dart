@@ -709,6 +709,186 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ajustes'**
   String get navSettings;
+
+  /// No description provided for @navShop.
+  ///
+  /// In es, this message translates to:
+  /// **'Tienda'**
+  String get navShop;
+
+  /// No description provided for @navAchievements.
+  ///
+  /// In es, this message translates to:
+  /// **'Logros'**
+  String get navAchievements;
+
+  /// No description provided for @navDaily.
+  ///
+  /// In es, this message translates to:
+  /// **'Reto Diario'**
+  String get navDaily;
+
+  /// No description provided for @coinsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Monedas'**
+  String get coinsLabel;
+
+  /// No description provided for @shopTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tienda'**
+  String get shopTitle;
+
+  /// No description provided for @shopTabItems.
+  ///
+  /// In es, this message translates to:
+  /// **'Ítems'**
+  String get shopTabItems;
+
+  /// No description provided for @shopTabBoards.
+  ///
+  /// In es, this message translates to:
+  /// **'Tablero'**
+  String get shopTabBoards;
+
+  /// No description provided for @shopTabPieces.
+  ///
+  /// In es, this message translates to:
+  /// **'Piezas'**
+  String get shopTabPieces;
+
+  /// No description provided for @shopBuy.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprar'**
+  String get shopBuy;
+
+  /// No description provided for @shopEquip.
+  ///
+  /// In es, this message translates to:
+  /// **'Equipar'**
+  String get shopEquip;
+
+  /// No description provided for @shopEquipped.
+  ///
+  /// In es, this message translates to:
+  /// **'Equipada'**
+  String get shopEquipped;
+
+  /// No description provided for @shopOwned.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprada'**
+  String get shopOwned;
+
+  /// No description provided for @shopInStock.
+  ///
+  /// In es, this message translates to:
+  /// **'En inventario: {count}'**
+  String shopInStock(int count);
+
+  /// No description provided for @shopNotEnough.
+  ///
+  /// In es, this message translates to:
+  /// **'Monedas insuficientes'**
+  String get shopNotEnough;
+
+  /// No description provided for @shopPurchased.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Comprado!'**
+  String get shopPurchased;
+
+  /// No description provided for @shopEquippedMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Equipada'**
+  String get shopEquippedMsg;
+
+  /// No description provided for @achievementsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Logros'**
+  String get achievementsTitle;
+
+  /// No description provided for @achievementsProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'{unlocked}/{total} desbloqueados'**
+  String achievementsProgress(int unlocked, int total);
+
+  /// No description provided for @achievementReward.
+  ///
+  /// In es, this message translates to:
+  /// **'+{coins}'**
+  String achievementReward(int coins);
+
+  /// No description provided for @achievementUnlocked.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Logro desbloqueado!'**
+  String get achievementUnlocked;
+
+  /// No description provided for @dailyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reto Diario'**
+  String get dailyTitle;
+
+  /// No description provided for @dailyTodayMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo de hoy'**
+  String get dailyTodayMode;
+
+  /// No description provided for @dailyPlay.
+  ///
+  /// In es, this message translates to:
+  /// **'Jugar reto'**
+  String get dailyPlay;
+
+  /// No description provided for @dailyDoneToday.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Reto de hoy completado!'**
+  String get dailyDoneToday;
+
+  /// No description provided for @dailyStreakLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Racha'**
+  String get dailyStreakLabel;
+
+  /// No description provided for @dailyBestStreak.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor racha'**
+  String get dailyBestStreak;
+
+  /// No description provided for @dailyCompletedTotal.
+  ///
+  /// In es, this message translates to:
+  /// **'Completados'**
+  String get dailyCompletedTotal;
+
+  /// No description provided for @streakDays.
+  ///
+  /// In es, this message translates to:
+  /// **'{days} días'**
+  String streakDays(int days);
+
+  /// No description provided for @dailyBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'HOY'**
+  String get dailyBadge;
+
+  /// No description provided for @resultCoins.
+  ///
+  /// In es, this message translates to:
+  /// **'+{coins} monedas'**
+  String resultCoins(int coins);
 }
 
 class _AppLocalizationsDelegate

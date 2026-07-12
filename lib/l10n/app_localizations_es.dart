@@ -327,4 +327,104 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navSettings => 'Ajustes';
+
+  @override
+  String get navShop => 'Tienda';
+
+  @override
+  String get navAchievements => 'Logros';
+
+  @override
+  String get navDaily => 'Reto Diario';
+
+  @override
+  String get coinsLabel => 'Monedas';
+
+  @override
+  String get shopTitle => 'Tienda';
+
+  @override
+  String get shopTabItems => 'Ítems';
+
+  @override
+  String get shopTabBoards => 'Tablero';
+
+  @override
+  String get shopTabPieces => 'Piezas';
+
+  @override
+  String get shopBuy => 'Comprar';
+
+  @override
+  String get shopEquip => 'Equipar';
+
+  @override
+  String get shopEquipped => 'Equipada';
+
+  @override
+  String get shopOwned => 'Comprada';
+
+  @override
+  String shopInStock(int count) {
+    return 'En inventario: $count';
+  }
+
+  @override
+  String get shopNotEnough => 'Monedas insuficientes';
+
+  @override
+  String get shopPurchased => '¡Comprado!';
+
+  @override
+  String get shopEquippedMsg => 'Equipada';
+
+  @override
+  String get achievementsTitle => 'Logros';
+
+  @override
+  String achievementsProgress(int unlocked, int total) {
+    return '$unlocked/$total desbloqueados';
+  }
+
+  @override
+  String achievementReward(int coins) {
+    return '+$coins';
+  }
+
+  @override
+  String get achievementUnlocked => '¡Logro desbloqueado!';
+
+  @override
+  String get dailyTitle => 'Reto Diario';
+
+  @override
+  String get dailyTodayMode => 'Modo de hoy';
+
+  @override
+  String get dailyPlay => 'Jugar reto';
+
+  @override
+  String get dailyDoneToday => '¡Reto de hoy completado!';
+
+  @override
+  String get dailyStreakLabel => 'Racha';
+
+  @override
+  String get dailyBestStreak => 'Mejor racha';
+
+  @override
+  String get dailyCompletedTotal => 'Completados';
+
+  @override
+  String streakDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String get dailyBadge => 'HOY';
+
+  @override
+  String resultCoins(int coins) {
+    return '+$coins monedas';
+  }
 }
