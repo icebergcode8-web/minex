@@ -8,6 +8,7 @@ import 'package:minex/core/constants/routes.dart';
 import 'package:minex/core/haptics/haptics_service.dart';
 import 'package:minex/data/local/hive_service.dart';
 import 'package:minex/data/repositories/records_repository.dart';
+import 'package:minex/data/repositories/savegame_repository.dart';
 import 'package:minex/data/repositories/settings_repository.dart';
 import 'package:minex/l10n/app_localizations.dart';
 import 'package:minex/ui/screens/custom_setup_screen.dart';
@@ -37,12 +38,25 @@ class FakeSettingsRepository extends SettingsRepository {
   bool get invertControls => false;
 }
 
+class FakeSavegameRepository extends SavegameRepository {
+  FakeSavegameRepository() : super(HiveService());
+  @override
+  bool get hasWaves => false;
+  @override
+  Map<String, dynamic>? loadWaves() => null;
+  @override
+  Future<void> saveWaves(Map<String, dynamic> state) async {}
+  @override
+  Future<void> clearWaves() async {}
+}
+
 Widget _wrap(Widget child) => MultiProvider(
       providers: [
         Provider<RecordsRepository>.value(value: FakeRecordsRepository()),
         Provider<SettingsRepository>.value(value: FakeSettingsRepository()),
         Provider<AudioService>.value(value: AudioService()),
         Provider<HapticsService>.value(value: HapticsService()),
+        Provider<SavegameRepository>.value(value: FakeSavegameRepository()),
       ],
       child: MaterialApp(
         locale: const Locale('es'),

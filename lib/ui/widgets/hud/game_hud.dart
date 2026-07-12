@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../domain/models/wave_modifier.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/game_provider.dart';
 
@@ -19,6 +20,41 @@ class GameTopHud extends StatelessWidget {
   Widget build(BuildContext context) {
     final gp = context.watch<GameProvider>();
     final palette = context.palette;
+
+    if (gp.isWaves) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            _HudButton(icon: Icons.pause, onTap: onPause),
+            const Spacer(),
+            _HudChip(
+              icon: Icons.favorite_rounded,
+              color: palette.danger,
+              label: '${gp.lives}',
+            ),
+            const SizedBox(width: 8),
+            _HudChip(
+              icon: Icons.waves_rounded,
+              color: palette.primary,
+              label: '${gp.wave}',
+            ),
+            const SizedBox(width: 8),
+            _HudChip(
+              icon: Icons.star_rounded,
+              color: palette.secondary,
+              label: '${gp.wavesScore}',
+            ),
+            if (gp.currentModifier != null) ...[
+              const SizedBox(width: 8),
+              _ModifierChip(modifier: gp.currentModifier!),
+            ],
+            const Spacer(),
+            _ShieldBadge(count: gp.shieldCharges),
+          ],
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -243,6 +279,74 @@ class _ItemButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Emoji + nombre localizado de un modificador de oleada (§2.5).
+({String emoji, String name}) modifierMeta(
+    WaveModifier m, AppLocalizations l) {
+  return switch (m) {
+    WaveModifier.chainedMines => (emoji: '⛓️', name: l.modChainedMines),
+    WaveModifier.partialFog => (emoji: '🌫️', name: l.modPartialFog),
+    WaveModifier.liarNumbers => (emoji: '🃏', name: l.modLiarNumbers),
+    WaveModifier.delayedMines => (emoji: '⏱️', name: l.modDelayedMines),
+  };
+}
+
+/// Chip que indica el modificador activo de la oleada.
+class _ModifierChip extends StatelessWidget {
+  const _ModifierChip({required this.modifier});
+  final WaveModifier modifier;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final meta = modifierMeta(modifier, AppLocalizations.of(context)!);
+    return Tooltip(
+      message: meta.name,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: palette.secondary.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: palette.secondary.withValues(alpha: 0.5)),
+        ),
+        child: Text(meta.emoji, style: const TextStyle(fontSize: 16)),
+      ),
+    );
+  }
+}
+
+/// Insignia del escudo en Oleadas: solo visible si hay cargas.
+class _ShieldBadge extends StatelessWidget {
+  const _ShieldBadge({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 0) return const SizedBox(width: 40);
+    final palette = context.palette;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🛡️', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 4),
+          Text('$count',
+              style: TextStyle(
+                color: palette.textPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 12,
+              )),
+        ],
       ),
     );
   }

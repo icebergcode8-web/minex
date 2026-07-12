@@ -146,6 +146,75 @@ class AppLocalizationsEs extends AppLocalizations {
   String get freezer => 'Congelar';
 
   @override
+  String get wavesWaveLabel => 'Oleada';
+
+  @override
+  String get wavesLivesLabel => 'Vidas';
+
+  @override
+  String get wavesScoreLabel => 'Puntos';
+
+  @override
+  String get wavesChooseUpgrade => 'Elige una mejora';
+
+  @override
+  String get wavesGameOver => 'Game Over';
+
+  @override
+  String wavesReached(int wave) {
+    return 'Llegaste a la oleada $wave';
+  }
+
+  @override
+  String get upgradeExtraLife => '+1 Vida';
+
+  @override
+  String get upgradeExtraLifeDesc => 'Recupera una vida (máx 5).';
+
+  @override
+  String get upgradeShield => 'Escudo';
+
+  @override
+  String get upgradeShieldDesc => 'Absorbe el próximo error sin costar vida.';
+
+  @override
+  String get upgradeRadar => 'Radar';
+
+  @override
+  String get upgradeRadarDesc => 'Marca 1 mina al inicio de cada oleada.';
+
+  @override
+  String get upgradeVision => 'Visión';
+
+  @override
+  String get upgradeVisionDesc =>
+      'Revela una zona segura al empezar la próxima oleada.';
+
+  @override
+  String get upgradeItemCharge => 'Carga extra';
+
+  @override
+  String get upgradeItemChargeDesc => '+1 carga de escudo.';
+
+  @override
+  String get continueWaves => 'Continuar Oleadas';
+
+  @override
+  String get modChainedMines => 'Minas encadenadas';
+
+  @override
+  String get modPartialFog => 'Niebla parcial';
+
+  @override
+  String get modLiarNumbers => 'Números mentirosos';
+
+  @override
+  String get modDelayedMines => 'Minas con retardo';
+
+  @override
+  String get waveNewMines => '¡Minas nuevas!';
+
+  @override
   String get pauseTitle => 'Pausa';
 
   @override

@@ -23,6 +23,9 @@ class ResultOverlay extends StatelessWidget {
     this.blitzScore = 0,
     this.blitzBoards = 0,
     this.timeUp = false,
+    this.isWaves = false,
+    this.wavesReached = 0,
+    this.wavesScore = 0,
   });
 
   final bool won;
@@ -37,6 +40,11 @@ class ResultOverlay extends StatelessWidget {
   final int blitzBoards;
   final bool timeUp;
 
+  // Oleadas (plan §2.5): game over con oleada alcanzada y puntaje.
+  final bool isWaves;
+  final int wavesReached;
+  final int wavesScore;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
@@ -48,6 +56,9 @@ class ResultOverlay extends StatelessWidget {
 
     if (isBlitz) {
       return _buildBlitz(context, palette, l, accent, celebrate);
+    }
+    if (isWaves) {
+      return _buildWaves(context, palette, l);
     }
     return Positioned.fill(
       child: Stack(
@@ -218,6 +229,90 @@ class ResultOverlay extends StatelessWidget {
           ),
           if (celebrate && isNewRecord)
             const Positioned.fill(child: ConfettiOverlay()),
+        ],
+      ),
+    );
+  }
+
+  /// Resultado del modo Oleadas (plan §2.5): game over con oleada y puntaje.
+  Widget _buildWaves(
+    BuildContext context,
+    BoardPalette palette,
+    AppLocalizations l,
+  ) {
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          ColoredBox(
+            color: palette.bg.withValues(alpha: 0.9),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l.wavesGameOver,
+                    style: TextStyle(
+                      color: palette.danger,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ).animate().scale(
+                        duration: 320.ms,
+                        curve: Curves.easeOutBack,
+                        begin: const Offset(0.6, 0.6),
+                      ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '$wavesScore',
+                    style: AppTheme.mono(
+                      fontSize: 56,
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(l.wavesScoreLabel,
+                      style: TextStyle(color: palette.textMuted)),
+                  const SizedBox(height: 10),
+                  Text(
+                    l.wavesReached(wavesReached),
+                    style: TextStyle(color: palette.textMuted, fontSize: 14),
+                  ),
+                  if (isNewRecord)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: palette.secondary.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(l.newRecord,
+                            style: TextStyle(
+                              color: palette.secondary,
+                              fontWeight: FontWeight.w800,
+                            )),
+                      ),
+                    ),
+                  const SizedBox(height: 28),
+                  PrimaryButton(
+                    label: l.playAgain,
+                    icon: Icons.refresh,
+                    onPressed: onPlayAgain,
+                  ),
+                  const SizedBox(height: 12),
+                  PrimaryButton(
+                    label: l.menu,
+                    icon: Icons.home_outlined,
+                    filled: false,
+                    color: palette.textMuted,
+                    onPressed: onExit,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (isNewRecord) const Positioned.fill(child: ConfettiOverlay()),
         ],
       ),
     );

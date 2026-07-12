@@ -14,8 +14,15 @@ abstract final class Routes {
 
 /// Argumentos para lanzar una partida.
 class GameArgs {
-  const GameArgs({required this.config, required this.difficulty});
+  const GameArgs({
+    required this.config,
+    required this.difficulty,
+    this.resumeWaves = false,
+  });
 
   final GameConfig config;
   final Difficulty difficulty;
+
+  /// Oleadas: si `true`, reanuda la run guardada en vez de empezar de cero.
+  final bool resumeWaves;
 }

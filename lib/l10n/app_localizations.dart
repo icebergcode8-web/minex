@@ -356,6 +356,138 @@ abstract class AppLocalizations {
   /// **'Congelar'**
   String get freezer;
 
+  /// No description provided for @wavesWaveLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Oleada'**
+  String get wavesWaveLabel;
+
+  /// No description provided for @wavesLivesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Vidas'**
+  String get wavesLivesLabel;
+
+  /// No description provided for @wavesScoreLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos'**
+  String get wavesScoreLabel;
+
+  /// No description provided for @wavesChooseUpgrade.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una mejora'**
+  String get wavesChooseUpgrade;
+
+  /// No description provided for @wavesGameOver.
+  ///
+  /// In es, this message translates to:
+  /// **'Game Over'**
+  String get wavesGameOver;
+
+  /// No description provided for @wavesReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Llegaste a la oleada {wave}'**
+  String wavesReached(int wave);
+
+  /// No description provided for @upgradeExtraLife.
+  ///
+  /// In es, this message translates to:
+  /// **'+1 Vida'**
+  String get upgradeExtraLife;
+
+  /// No description provided for @upgradeExtraLifeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Recupera una vida (máx 5).'**
+  String get upgradeExtraLifeDesc;
+
+  /// No description provided for @upgradeShield.
+  ///
+  /// In es, this message translates to:
+  /// **'Escudo'**
+  String get upgradeShield;
+
+  /// No description provided for @upgradeShieldDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Absorbe el próximo error sin costar vida.'**
+  String get upgradeShieldDesc;
+
+  /// No description provided for @upgradeRadar.
+  ///
+  /// In es, this message translates to:
+  /// **'Radar'**
+  String get upgradeRadar;
+
+  /// No description provided for @upgradeRadarDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca 1 mina al inicio de cada oleada.'**
+  String get upgradeRadarDesc;
+
+  /// No description provided for @upgradeVision.
+  ///
+  /// In es, this message translates to:
+  /// **'Visión'**
+  String get upgradeVision;
+
+  /// No description provided for @upgradeVisionDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Revela una zona segura al empezar la próxima oleada.'**
+  String get upgradeVisionDesc;
+
+  /// No description provided for @upgradeItemCharge.
+  ///
+  /// In es, this message translates to:
+  /// **'Carga extra'**
+  String get upgradeItemCharge;
+
+  /// No description provided for @upgradeItemChargeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'+1 carga de escudo.'**
+  String get upgradeItemChargeDesc;
+
+  /// No description provided for @continueWaves.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar Oleadas'**
+  String get continueWaves;
+
+  /// No description provided for @modChainedMines.
+  ///
+  /// In es, this message translates to:
+  /// **'Minas encadenadas'**
+  String get modChainedMines;
+
+  /// No description provided for @modPartialFog.
+  ///
+  /// In es, this message translates to:
+  /// **'Niebla parcial'**
+  String get modPartialFog;
+
+  /// No description provided for @modLiarNumbers.
+  ///
+  /// In es, this message translates to:
+  /// **'Números mentirosos'**
+  String get modLiarNumbers;
+
+  /// No description provided for @modDelayedMines.
+  ///
+  /// In es, this message translates to:
+  /// **'Minas con retardo'**
+  String get modDelayedMines;
+
+  /// No description provided for @waveNewMines.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Minas nuevas!'**
+  String get waveNewMines;
+
   /// No description provided for @pauseTitle.
   ///
   /// In es, this message translates to:

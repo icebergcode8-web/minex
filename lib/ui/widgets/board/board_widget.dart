@@ -183,8 +183,9 @@ class _BoardWidgetState extends State<BoardWidget>
       }
     }
 
-    // Niebla en juego: mantener el ticker vivo para animar el fade.
-    _fogActive = gp.isFog && gp.status == GameStatus.playing;
+    // Niebla en juego (modo Niebla o modificador de Oleadas): mantener el
+    // ticker vivo para animar el fade.
+    _fogActive = gp.fogActive && gp.status == GameStatus.playing;
     if (_fogActive) needsTick = true;
 
     if (needsTick || needsShake || revealed || flagged) {
@@ -241,7 +242,7 @@ class _BoardWidgetState extends State<BoardWidget>
   /// el resto de modos. Usa el reloj de pared para animar el fade de forma
   /// continua entre revelados (§2.2). El cálculo vive en [FogEngine] (puro).
   double Function(int row, int col)? _buildFogBrightness(GameProvider gp) {
-    if (!gp.isFog) return null;
+    if (!gp.fogActive) return null;
     final playing = gp.status == GameStatus.playing;
     final focusR = gp.fogFocusRow;
     final focusC = gp.fogFocusCol;

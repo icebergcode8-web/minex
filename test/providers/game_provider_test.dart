@@ -2,10 +2,34 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:minex/core/constants/difficulty.dart';
 import 'package:minex/data/local/hive_service.dart';
 import 'package:minex/data/repositories/records_repository.dart';
+import 'package:minex/data/repositories/savegame_repository.dart';
 import 'package:minex/domain/models/game_config.dart';
 import 'package:minex/domain/models/game_mode.dart';
 import 'package:minex/domain/models/game_status.dart';
+import 'package:minex/domain/models/wave_modifier.dart';
 import 'package:minex/providers/game_provider.dart';
+
+/// Savegame en memoria: evita depender de Hive en los tests.
+class FakeSavegameRepository extends SavegameRepository {
+  FakeSavegameRepository() : super(HiveService());
+  Map<String, dynamic>? _waves;
+
+  @override
+  bool get hasWaves => _waves != null;
+
+  @override
+  Map<String, dynamic>? loadWaves() => _waves;
+
+  @override
+  Future<void> saveWaves(Map<String, dynamic> state) async {
+    _waves = Map<String, dynamic>.of(state);
+  }
+
+  @override
+  Future<void> clearWaves() async {
+    _waves = null;
+  }
+}
 
 /// Records en memoria: evita depender de Hive en los tests del provider.
 class FakeRecordsRepository extends RecordsRepository {
@@ -36,6 +60,20 @@ class FakeRecordsRepository extends RecordsRepository {
   Future<bool> recordBlitz(int score) async {
     if (score > _blitzBest) {
       _blitzBest = score;
+      return true;
+    }
+    return false;
+  }
+
+  int _wavesBest = 0;
+
+  @override
+  int get wavesBestScore => _wavesBest;
+
+  @override
+  Future<bool> recordWaves(int score) async {
+    if (score > _wavesBest) {
+      _wavesBest = score;
       return true;
     }
     return false;
@@ -282,6 +320,212 @@ void main() {
       expect(cell.isLiar, isFalse);
       expect(cell.displayedNumber, cell.adjacentMines); // ya dice la verdad
       gp.dispose();
+    });
+  });
+
+  group('Oleadas (§2.5)', () {
+    GameProvider newWaves({
+      FakeSavegameRepository? save,
+      bool resume = false,
+      WaveModifier? modifier,
+    }) =>
+        GameProvider(
+          config: wavesConfig(),
+          difficulty: Difficulty.easy,
+          records: FakeRecordsRepository(),
+          savegame: save ?? FakeSavegameRepository(),
+          resumeWaves: resume,
+          debugForceModifier: modifier,
+        );
+
+    test('arranca en oleada 1, 7×7, 3 vidas y jugando', () {
+      final gp = newWaves();
+      expect(gp.isWaves, isTrue);
+      expect(gp.wave, 1);
+      expect(gp.lives, 3);
+      expect(gp.board.rows, 7);
+      expect(gp.board.cols, 7);
+      expect(gp.status, GameStatus.playing);
+      gp.dispose();
+    });
+
+    test('completar la oleada ofrece mejoras y sumar puntaje; elegir avanza',
+        () {
+      final gp = newWaves();
+      // Revelar todas las celdas seguras del tablero.
+      while (!gp.awaitingUpgrade) {
+        final remaining = gp.board.cells
+            .where((c) => !c.hasMine && !c.isRevealed)
+            .toList();
+        if (remaining.isEmpty) break;
+        gp.onTap(remaining.first.row, remaining.first.col);
+      }
+      expect(gp.awaitingUpgrade, isTrue);
+      expect(gp.upgradeChoices.length, 3);
+      expect(gp.wavesScore, 1 * 49); // oleada 1 × 49 celdas
+
+      gp.chooseUpgrade(gp.upgradeChoices.first);
+      expect(gp.awaitingUpgrade, isFalse);
+      expect(gp.wave, 2);
+      expect(gp.board.rows, 8); // +1 fila en la oleada 2
+      gp.dispose();
+    });
+
+    test('tocar una mina cuesta una vida y la neutraliza (no game over)', () {
+      final gp = newWaves();
+      final mine = gp.board.cells.firstWhere((c) => c.hasMine);
+      gp.onTap(mine.row, mine.col);
+      expect(gp.lives, 2);
+      expect(gp.status, GameStatus.playing);
+      expect(gp.board.cellAt(mine.row, mine.col).isFlagged, isTrue);
+      gp.dispose();
+    });
+
+    test('agotar las vidas es game over y limpia el savegame', () {
+      final save = FakeSavegameRepository();
+      final gp = newWaves(save: save);
+      final mines =
+          gp.board.cells.where((c) => c.hasMine).take(3).toList();
+      for (final m in mines) {
+        gp.onTap(m.row, m.col);
+      }
+      expect(gp.lives, 0);
+      expect(gp.status, GameStatus.lost);
+      expect(save.hasWaves, isFalse); // run terminada → sin partida guardada
+      gp.dispose();
+    });
+
+    test('reanuda la run guardada (solo progresión, sin tablero) regenera', () {
+      final save = FakeSavegameRepository();
+      save.saveWaves({
+        'wave': 4,
+        'lives': 2,
+        'score': 200,
+        'shield': 1,
+        'radar': true,
+        'vision': false,
+      });
+      final gp = newWaves(save: save, resume: true);
+      expect(gp.wave, 4);
+      expect(gp.lives, 2);
+      expect(gp.wavesScore, 200);
+      expect(gp.shieldCharges, 1);
+      expect(gp.board.rows, 9); // boardFor(4) = 9×8
+      gp.dispose();
+    });
+
+    test('reanuda el tablero EXACTO tras cerrar la app a media oleada', () {
+      // 1ª sesión: jugar unos toques en una oleada con modificador conocido.
+      final save = FakeSavegameRepository();
+      final gp1 = newWaves(save: save, modifier: WaveModifier.chainedMines);
+      // Revelar algunas celdas seguras (sin completar la oleada).
+      final safe = gp1.board.cells
+          .where((c) => !c.hasMine && !c.isRevealed)
+          .take(3)
+          .toList();
+      for (final c in safe) {
+        gp1.onTap(c.row, c.col);
+      }
+      // Poner una bandera en una mina conocida.
+      final mine = gp1.board.cells.firstWhere((c) => c.hasMine);
+      gp1.toggleFlagMode();
+      gp1.onTap(mine.row, mine.col);
+      // Fotografiar el estado exacto antes de "cerrar".
+      final revealedBefore = {
+        for (final c in gp1.board.cells)
+          if (c.isRevealed) '${c.row},${c.col}',
+      };
+      final flaggedBefore = {
+        for (final c in gp1.board.cells)
+          if (c.isFlagged) '${c.row},${c.col}',
+      };
+      final mineCountBefore =
+          gp1.board.cells.where((c) => c.hasMine).length;
+      gp1.dispose();
+
+      // 2ª sesión: reanudar desde el mismo savegame.
+      final gp2 = newWaves(save: save, resume: true);
+      expect(gp2.status, GameStatus.playing);
+      expect(gp2.currentModifier, WaveModifier.chainedMines);
+      expect(gp2.board.cells.where((c) => c.hasMine).length, mineCountBefore);
+      final revealedAfter = {
+        for (final c in gp2.board.cells)
+          if (c.isRevealed) '${c.row},${c.col}',
+      };
+      final flaggedAfter = {
+        for (final c in gp2.board.cells)
+          if (c.isFlagged) '${c.row},${c.col}',
+      };
+      expect(revealedAfter, revealedBefore); // mismas celdas reveladas
+      expect(flaggedAfter, flaggedBefore); // mismas banderas
+      gp2.dispose();
+    });
+
+    test('reanuda ofreciendo mejora si se cerró en la pantalla de mejora', () {
+      final save = FakeSavegameRepository();
+      final gp1 = newWaves(save: save);
+      while (!gp1.awaitingUpgrade) {
+        final remaining = gp1.board.cells
+            .where((c) => !c.hasMine && !c.isRevealed)
+            .toList();
+        if (remaining.isEmpty) break;
+        gp1.onTap(remaining.first.row, remaining.first.col);
+      }
+      expect(gp1.awaitingUpgrade, isTrue);
+      final choicesBefore =
+          gp1.upgradeChoices.map((u) => u.name).toList();
+      gp1.dispose();
+
+      final gp2 = newWaves(save: save, resume: true);
+      expect(gp2.awaitingUpgrade, isTrue);
+      expect(gp2.upgradeChoices.map((u) => u.name).toList(), choicesBefore);
+      gp2.dispose();
+    });
+
+    group('modificadores (§2.5)', () {
+      test('niebla parcial activa la visibilidad limitada', () {
+        final gp = newWaves(modifier: WaveModifier.partialFog);
+        expect(gp.currentModifier, WaveModifier.partialFog);
+        expect(gp.wavePartialFog, isTrue);
+        expect(gp.fogActive, isTrue);
+        expect(gp.fogFocusRow, greaterThanOrEqualTo(0)); // foco en el centro
+        gp.dispose();
+      });
+
+      test('números mentirosos marca celdas del tablero', () {
+        final gp = newWaves(modifier: WaveModifier.liarNumbers);
+        expect(gp.currentModifier, WaveModifier.liarNumbers);
+        expect(gp.board.cells.any((c) => c.isLiar), isTrue);
+        gp.dispose();
+      });
+
+      test('minas encadenadas mantiene el número de minas de la oleada', () {
+        final gp = newWaves(modifier: WaveModifier.chainedMines);
+        expect(gp.currentModifier, WaveModifier.chainedMines);
+        expect(gp.board.cells.where((c) => c.hasMine).length, 6);
+        gp.dispose();
+      });
+
+      test('minas con retardo inyecta 3 minas a mitad de oleada + aviso', () {
+        final gp = newWaves(modifier: WaveModifier.delayedMines);
+        final initial = gp.board.cells.where((c) => c.hasMine).length;
+        var injected = false;
+        while (!gp.awaitingUpgrade) {
+          final remaining = gp.board.cells
+              .where((c) => !c.hasMine && !c.isRevealed)
+              .toList();
+          if (remaining.isEmpty) break;
+          gp.onTap(remaining.first.row, remaining.first.col);
+          if (gp.board.cells.where((c) => c.hasMine).length > initial) {
+            injected = true;
+            break;
+          }
+        }
+        expect(injected, isTrue);
+        expect(gp.board.cells.where((c) => c.hasMine).length, initial + 3);
+        expect(gp.waveWarningActive, isTrue);
+        gp.dispose();
+      });
     });
   });
 }

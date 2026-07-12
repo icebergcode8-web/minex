@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/constants/difficulty.dart';
 import '../../core/constants/routes.dart';
 import '../../core/theme/app_palette.dart';
+import '../../data/repositories/savegame_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/common/app_background.dart';
 import '../widgets/common/app_card.dart';
@@ -81,6 +84,25 @@ class HomeScreen extends StatelessWidget {
                     duration: 1200.ms,
                     curve: Curves.easeInOut,
                   ),
+              // Continuar la run de Oleadas guardada (plan §8.1/§2.5).
+              if (context.read<SavegameRepository>().hasWaves) ...[
+                const SizedBox(height: 14),
+                PrimaryButton(
+                  label: l.continueWaves,
+                  icon: Icons.waves_rounded,
+                  filled: false,
+                  color: palette.secondary,
+                  glow: false,
+                  onPressed: () => Navigator.of(context).pushNamed(
+                    Routes.game,
+                    arguments: GameArgs(
+                      config: wavesConfig(),
+                      difficulty: Difficulty.easy,
+                      resumeWaves: true,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 48),
             ],
           ),

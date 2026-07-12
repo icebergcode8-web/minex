@@ -54,6 +54,15 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
       case GameMode.liar:
         // Mentiroso: dificultades de Medio en adelante (§2.4).
         nav.pushNamed(Routes.difficulty, arguments: GameMode.liar);
+      case GameMode.waves:
+        // Oleadas: sin selección de dificultad, arranca la run (§2.5).
+        nav.pushNamed(
+          Routes.game,
+          arguments: GameArgs(
+            config: wavesConfig(),
+            difficulty: Difficulty.easy, // no aplica; récord propio
+          ),
+        );
       case GameMode.classic:
       default:
         nav.pushNamed(Routes.difficulty, arguments: GameMode.classic);

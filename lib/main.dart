@@ -7,6 +7,7 @@ import 'core/audio/audio_service.dart';
 import 'core/haptics/haptics_service.dart';
 import 'data/local/hive_service.dart';
 import 'data/repositories/records_repository.dart';
+import 'data/repositories/savegame_repository.dart';
 import 'data/repositories/settings_repository.dart';
 import 'providers/settings_provider.dart';
 
@@ -35,6 +36,7 @@ Future<void> main() async {
         Provider<HiveService>.value(value: hive),
         Provider<SettingsRepository>.value(value: settingsRepo),
         Provider<RecordsRepository>(create: (_) => RecordsRepository(hive)),
+        Provider<SavegameRepository>(create: (_) => SavegameRepository(hive)),
         Provider<AudioService>.value(value: audio),
         Provider<HapticsService>.value(value: haptics),
         ChangeNotifierProvider<SettingsProvider>(

@@ -42,4 +42,31 @@ class Cell {
 
   /// `true` si es una celda vacía (sin minas alrededor) ya destapada.
   bool get isEmpty => !hasMine && adjacentMines == 0;
+
+  /// Serializa la celda a un mapa compacto para el savegame (§6.2). `row`/`col`
+  /// se omiten porque los deduce la posición en la grilla al restaurar. Solo se
+  /// incluyen los campos que difieren del valor por defecto para ahorrar espacio.
+  Map<String, dynamic> toMap() => {
+        if (adjacentMines != 0) 'a': adjacentMines,
+        if (hasMine) 'm': 1,
+        if (isRevealed) 'r': 1,
+        if (isFlagged) 'f': 1,
+        if (displayedNumber != null) 'd': displayedNumber,
+        if (isLiar) 'l': 1,
+        if (minedBelow) 'b': 1,
+      };
+
+  /// Reconstruye una celda desde un mapa de [toMap], dadas su [row]/[col].
+  factory Cell.fromMap(Map<String, dynamic> m, {required int row, required int col}) =>
+      Cell(
+        row: row,
+        col: col,
+        hasMine: m['m'] == 1,
+        isRevealed: m['r'] == 1,
+        isFlagged: m['f'] == 1,
+        adjacentMines: (m['a'] as num?)?.toInt() ?? 0,
+        displayedNumber: (m['d'] as num?)?.toInt(),
+        isLiar: m['l'] == 1,
+        minedBelow: m['b'] == 1,
+      );
 }

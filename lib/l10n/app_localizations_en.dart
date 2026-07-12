@@ -146,6 +146,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freezer => 'Freeze';
 
   @override
+  String get wavesWaveLabel => 'Wave';
+
+  @override
+  String get wavesLivesLabel => 'Lives';
+
+  @override
+  String get wavesScoreLabel => 'Score';
+
+  @override
+  String get wavesChooseUpgrade => 'Choose an upgrade';
+
+  @override
+  String get wavesGameOver => 'Game Over';
+
+  @override
+  String wavesReached(int wave) {
+    return 'You reached wave $wave';
+  }
+
+  @override
+  String get upgradeExtraLife => '+1 Life';
+
+  @override
+  String get upgradeExtraLifeDesc => 'Regain a life (max 5).';
+
+  @override
+  String get upgradeShield => 'Shield';
+
+  @override
+  String get upgradeShieldDesc =>
+      'Absorbs the next mistake without losing a life.';
+
+  @override
+  String get upgradeRadar => 'Radar';
+
+  @override
+  String get upgradeRadarDesc => 'Flags 1 mine at the start of each wave.';
+
+  @override
+  String get upgradeVision => 'Vision';
+
+  @override
+  String get upgradeVisionDesc =>
+      'Reveals a safe zone at the start of the next wave.';
+
+  @override
+  String get upgradeItemCharge => 'Extra charge';
+
+  @override
+  String get upgradeItemChargeDesc => '+1 shield charge.';
+
+  @override
+  String get continueWaves => 'Continue Waves';
+
+  @override
+  String get modChainedMines => 'Chained mines';
+
+  @override
+  String get modPartialFog => 'Partial fog';
+
+  @override
+  String get modLiarNumbers => 'Lying numbers';
+
+  @override
+  String get modDelayedMines => 'Delayed mines';
+
+  @override
+  String get waveNewMines => 'New mines!';
+
+  @override
   String get pauseTitle => 'Paused';
 
   @override

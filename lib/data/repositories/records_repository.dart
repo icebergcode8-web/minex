@@ -54,4 +54,18 @@ class RecordsRepository {
     }
     return false;
   }
+
+  // ── Oleadas (plan §2.5): mejor puntaje local ───────────────────────
+  static const _kWavesBest = 'waves_bestScore';
+
+  int get wavesBestScore => _hive.records.get(_kWavesBest, defaultValue: 0);
+
+  /// Guarda el puntaje de una run de Oleadas. Devuelve `true` si es récord.
+  Future<bool> recordWaves(int score) async {
+    if (score > wavesBestScore) {
+      await _hive.records.put(_kWavesBest, score);
+      return true;
+    }
+    return false;
+  }
 }

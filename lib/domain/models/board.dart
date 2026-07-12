@@ -65,4 +65,35 @@ class Board {
   /// Minas restantes según banderas puestas (puede ser negativo si el jugador
   /// sobre-marca). La UI lo muestra en el contador del HUD.
   int get minesRemaining => mineCount - flaggedCount;
+
+  /// Serializa el tablero completo (dimensiones + estado de cada celda) para el
+  /// savegame exacto (§6.2). Las celdas van en orden fila-por-fila.
+  Map<String, dynamic> toMap() => {
+        'rows': rows,
+        'cols': cols,
+        'mineCount': mineCount,
+        'cells': [for (final c in cells) c.toMap()],
+      };
+
+  /// Reconstruye un tablero desde un mapa de [toMap].
+  factory Board.fromMap(Map<String, dynamic> m) {
+    final rows = (m['rows'] as num).toInt();
+    final cols = (m['cols'] as num).toInt();
+    final cellMaps = (m['cells'] as List).cast<Map<String, dynamic>>();
+    final grid = List.generate(
+      rows,
+      (r) => List.generate(
+        cols,
+        (c) => Cell.fromMap(cellMaps[r * cols + c], row: r, col: c),
+        growable: false,
+      ),
+      growable: false,
+    );
+    return Board(
+      rows: rows,
+      cols: cols,
+      grid: grid,
+      mineCount: (m['mineCount'] as num).toInt(),
+    );
+  }
 }

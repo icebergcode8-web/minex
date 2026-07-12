@@ -76,6 +76,16 @@ GameConfig fogConfig(Difficulty difficulty, {int? seed}) {
   );
 }
 
+/// Config del modo Oleadas (plan §2.5). Las dimensiones reales por oleada las
+/// calcula `WavesEngine`; aquí solo se fija el modo y un tablero inicial válido.
+GameConfig wavesConfig() => const GameConfig(
+      mode: GameMode.waves,
+      rows: 7,
+      cols: 7,
+      mines: 6,
+      lives: 3,
+    );
+
 /// Dificultades disponibles para Mentiroso (plan §2.4): Medio en adelante.
 const List<Difficulty> kLiarDifficulties = [
   Difficulty.medium,

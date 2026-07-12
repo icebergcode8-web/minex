@@ -46,7 +46,9 @@
 - [x] **Blitz** (`scoring.dart` con combos + tests, cronómetro descendente, +20s, regen de tablero, HUD combo, ítem Congelador) — jugable desde ModeSelect
 - [x] **Niebla** (`fog_engine.dart` puro + tests, radio de visibilidad con fade por reloj de pared, overlay en el painter, ítem Linterna 5s) — jugable con dificultades del clásico. _Puntaje ×1.5 y récords propios → Fase 5 (economía)_
 - [x] **Mentiroso** (`liar_engine.dart` puro + tests, 15% mienten ±1, marca de esquina doblada en el painter, ítem Escáner 3 cargas) — solo Medio+. _Puntaje ×2 → Fase 5 (economía)_
-- [ ] **Oleadas** (`waves_engine.dart`, mejoras roguelike, modificadores, 3 vidas, **savegame serializado**)
+- [x] **Oleadas** (`waves_engine.dart` puro + tests, 3 vidas, crecimiento alternado +0.5%, mejoras roguelike 1-de-3, escudo/radar/visión, game over, **savegame** run-level en `savegameBox` + "Continuar" en Home) — jugable.
+- [x] **Modificadores de oleada ≥5** (§2.5): minas encadenadas (`generateChained`), niebla parcial (reusa FogEngine), 5% números mentirosos (reusa LiarEngine), minas con retardo (`injectMines` a mitad de oleada + aviso) — con tests.
+- [x] **Savegame a nivel de tablero exacto** (§6.2): `Board.toMap/fromMap` + `Cell.toMap/fromMap` (serialización pura), persistencia tras cada revelado/bandera y restauración exacta (celdas, banderas, minas inyectadas, modificador y pantalla de mejora) — "kill+reabrir restaura Oleadas" tal cual estaba (§12), con tests de round-trip.
 
 ## 🏆 Fase 5 — Economía (punto de publicación recomendado)
 - [ ] Monedas + `EconomyProvider`/`EconomyRepo`

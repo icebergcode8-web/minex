@@ -18,8 +18,10 @@ abstract final class HiveBoxes {
 class HiveService {
   Box? _settings;
   Box? _records;
+  Box? _savegame;
 
-  bool get isReady => _settings != null && _records != null;
+  bool get isReady =>
+      _settings != null && _records != null && _savegame != null;
 
   /// Inicializa Hive y abre las cajas necesarias. Idempotente.
   Future<void> init() async {
@@ -27,10 +29,12 @@ class HiveService {
     await Hive.initFlutter();
     _settings = await Hive.openBox(HiveBoxes.settings);
     _records = await Hive.openBox(HiveBoxes.records);
+    _savegame = await Hive.openBox(HiveBoxes.savegame);
   }
 
   Box get settings => _requireBox(_settings, HiveBoxes.settings);
   Box get records => _requireBox(_records, HiveBoxes.records);
+  Box get savegame => _requireBox(_savegame, HiveBoxes.savegame);
 
   Box _requireBox(Box? box, String name) {
     if (box == null) {

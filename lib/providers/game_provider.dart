@@ -1,18 +1,22 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
 import '../core/constants/difficulty.dart';
 import '../data/repositories/records_repository.dart';
+import '../data/repositories/savegame_repository.dart';
 import '../domain/engine/board_generator.dart';
 import '../domain/engine/liar_engine.dart';
 import '../domain/engine/minesweeper_engine.dart';
 import '../domain/engine/scoring.dart';
+import '../domain/engine/waves_engine.dart';
 import '../domain/models/board.dart';
 import '../domain/models/cell.dart';
 import '../domain/models/game_config.dart';
 import '../domain/models/game_mode.dart';
 import '../domain/models/game_status.dart';
+import '../domain/models/wave_modifier.dart';
 
 /// Estado de la partida actual (plan §6.3). **No contiene lógica de juego**:
 /// orquesta los engines (Dart puro) ↔ la UI y notifica cambios. Se crea scoped a
@@ -26,14 +30,23 @@ class GameProvider extends ChangeNotifier {
     required this.config,
     required this.difficulty,
     required RecordsRepository records,
+    SavegameRepository? savegame,
+    bool resumeWaves = false,
     bool invertControls = false,
+    WaveModifier? debugForceModifier,
     BoardGenerator generator = const BoardGenerator(),
     MinesweeperEngine engine = const MinesweeperEngine(),
   })  : _records = records,
+        _savegameRepo = savegame,
         _invertControls = invertControls,
+        _debugForceModifier = debugForceModifier,
         _generator = generator,
         _engine = engine {
-    _startNewBoard();
+    if (isWaves) {
+      _startWavesRun(resume: resumeWaves);
+    } else {
+      _startNewBoard();
+    }
   }
 
   // Nota: se usa lista de inicialización (no initializing formals) a propósito,
@@ -45,9 +58,13 @@ class GameProvider extends ChangeNotifier {
   final Difficulty difficulty;
 
   final RecordsRepository _records;
+  final SavegameRepository? _savegameRepo;
   final BoardGenerator _generator;
   final MinesweeperEngine _engine;
   final bool _invertControls;
+
+  /// Fuerza un modificador de oleada (solo tests); si es `null`, se sortea.
+  final WaveModifier? _debugForceModifier;
 
   // ── Constantes de Blitz (plan §2.3) ────────────────────────────────
   static const _blitzBudgetMs = 60000; // 60s iniciales
@@ -59,9 +76,12 @@ class GameProvider extends ChangeNotifier {
   bool get isBlitz => config.mode == GameMode.blitz;
   bool get isFog => config.mode == GameMode.fog;
   bool get isLiar => config.mode == GameMode.liar;
+  bool get isWaves => config.mode == GameMode.waves;
   bool get isClassicScored => config.mode == GameMode.classic;
 
   static const _liarEngine = LiarEngine();
+  static const _wavesEngine = WavesEngine();
+  final Random _wavesRng = Random();
 
   // ── Estado observable ──────────────────────────────────────────────
   late Board _board;
@@ -115,6 +135,43 @@ class GameProvider extends ChangeNotifier {
   bool _scannerMode = false;
   int get scannerCharges => _scannerCharges;
   bool get scannerMode => _scannerMode;
+
+  // ── Oleadas (plan §2.5) ────────────────────────────────────────────
+  int _wave = 1;
+  int _lives = 3;
+  int _wavesScore = 0;
+  int _shield = 0; // cargas de escudo (absorben un error sin costar vida)
+  bool _radar = false; // pasivo: marca 1 mina al inicio de cada oleada
+  bool _vision = false; // una vez: revela zona segura al inicio de la próxima
+  bool _awaitingUpgrade = false;
+  List<WaveUpgrade> _upgradeChoices = const [];
+
+  int get wave => _wave;
+  int get lives => _lives;
+  int get maxLives => _wavesEngine.maxLives;
+  int get wavesScore => _wavesScore;
+  int get shieldCharges => _shield;
+  bool get awaitingUpgrade => _awaitingUpgrade;
+  List<WaveUpgrade> get upgradeChoices => _upgradeChoices;
+
+  // Modificadores de oleada ≥5 (§2.5).
+  WaveModifier? _currentModifier;
+  bool _wavePartialFog = false;
+  bool _delayedPending = false; // hay minas con retardo por inyectar
+  bool _delayedDone = false; // ya se inyectaron en esta oleada
+  int _waveWarningUntilEpochMs = 0; // aviso transitorio de "minas nuevas"
+  Timer? _warningTimer;
+
+  WaveModifier? get currentModifier => _currentModifier;
+  bool get wavePartialFog => _wavePartialFog;
+
+  /// La niebla (visibilidad limitada) está activa: modo Niebla o modificador
+  /// de niebla parcial en Oleadas.
+  bool get fogActive => isFog || _wavePartialFog;
+
+  /// Aviso transitorio tras inyectar minas con retardo.
+  bool get waveWarningActive =>
+      DateTime.now().millisecondsSinceEpoch < _waveWarningUntilEpochMs;
 
   /// Se incrementa cada vez que empieza un tablero nuevo (nueva partida o
   /// siguiente tablero de Blitz). El BoardWidget lo usa para limpiar sus
@@ -173,8 +230,253 @@ class GameProvider extends ChangeNotifier {
   }
 
   void restart() {
-    _startNewBoard();
+    if (isWaves) {
+      _startWavesRun(resume: false); // reiniciar = nueva run desde la oleada 1
+    } else {
+      _startNewBoard();
+    }
     notifyListeners();
+  }
+
+  // ── Oleadas (plan §2.5) ────────────────────────────────────────────
+  /// Arranca (o reanuda) una run de Oleadas y genera el tablero de la oleada.
+  void _startWavesRun({required bool resume}) {
+    final saved = resume ? _savegameRepo?.loadWaves() : null;
+    if (saved != null) {
+      _wave = (saved['wave'] as num?)?.toInt() ?? 1;
+      _lives = (saved['lives'] as num?)?.toInt() ?? _wavesEngine.startLives;
+      _wavesScore = (saved['score'] as num?)?.toInt() ?? 0;
+      _shield = (saved['shield'] as num?)?.toInt() ?? 0;
+      _radar = saved['radar'] as bool? ?? false;
+      _vision = saved['vision'] as bool? ?? false;
+    } else {
+      _wave = 1;
+      _lives = _wavesEngine.startLives;
+      _wavesScore = 0;
+      _shield = 0;
+      _radar = false;
+      _vision = false;
+    }
+    _isNewRecord = false;
+    _awaitingUpgrade = false;
+    _upgradeChoices = const [];
+
+    // Restauración exacta: si el guardado trae el tablero en curso, se reanuda
+    // tal cual (celdas, banderas, modificador); si no, se genera la oleada.
+    final savedBoard = saved?['board'];
+    if (savedBoard is Map) {
+      _restoreWaveBoard(saved!);
+    } else {
+      _startWaveBoard();
+    }
+    _persistWaves();
+  }
+
+  /// Reanuda el tablero exacto de la oleada guardado en [saved] (§6.2), sin
+  /// regenerar minas ni re-aplicar radar/visión (ya reflejados en las celdas).
+  void _restoreWaveBoard(Map<String, dynamic> saved) {
+    _board = Board.fromMap((saved['board'] as Map).cast<String, dynamic>());
+    _minesPlaced = true;
+    explodedCell = null;
+    lastRevealed = const [];
+    boardGeneration++;
+
+    final modName = saved['modifier'] as String?;
+    WaveModifier? mod;
+    if (modName != null) {
+      for (final m in WaveModifier.values) {
+        if (m.name == modName) {
+          mod = m;
+          break;
+        }
+      }
+    }
+    _currentModifier = mod;
+    _wavePartialFog = _currentModifier == WaveModifier.partialFog;
+    _delayedPending = _currentModifier == WaveModifier.delayedMines;
+    _delayedDone = saved['delayedDone'] as bool? ?? false;
+
+    // Niebla parcial: reencuadrar el foco en el centro al reanudar.
+    if (_wavePartialFog) {
+      _setFogFocus(_board.rows ~/ 2, _board.cols ~/ 2);
+    }
+
+    _status = GameStatus.playing;
+
+    // Si se cerró la app mientras se elegía mejora, se vuelve a ofrecer.
+    final choiceNames = (saved['upgradeChoices'] as List?)?.cast<String>();
+    if (choiceNames != null && choiceNames.isNotEmpty) {
+      _upgradeChoices = [
+        for (final n in choiceNames)
+          WaveUpgrade.values.firstWhere((u) => u.name == n),
+      ];
+      _awaitingUpgrade = true;
+    }
+  }
+
+  /// Genera el tablero de la oleada actual (eager, con centro seguro) y aplica
+  /// los efectos de inicio de oleada (radar/visión). A diferencia del clásico,
+  /// Oleadas coloca las minas al inicio para que radar/visión tengan sentido.
+  void _startWaveBoard() {
+    final spec = _wavesEngine.boardFor(_wave);
+    final cr = spec.rows ~/ 2;
+    final cc = spec.cols ~/ 2;
+
+    // Modificador de oleada (≥5, §2.5). Puede forzarse en tests.
+    _currentModifier =
+        _debugForceModifier ?? _wavesEngine.modifierFor(_wave, _wavesRng);
+    _wavePartialFog = _currentModifier == WaveModifier.partialFog;
+    _delayedPending = _currentModifier == WaveModifier.delayedMines;
+    _delayedDone = false;
+
+    // "Minas encadenadas" cambia la colocación; el resto usan la normal.
+    _board = _currentModifier == WaveModifier.chainedMines
+        ? _generator.generateChained(
+            rows: spec.rows,
+            cols: spec.cols,
+            mines: spec.mines,
+            safeRow: cr,
+            safeCol: cc,
+          )
+        : _generator.generate(
+            rows: spec.rows,
+            cols: spec.cols,
+            mines: spec.mines,
+            safeRow: cr,
+            safeCol: cc,
+          );
+
+    // "Números mentirosos" (5%) reusa el LiarEngine sobre el tablero.
+    if (_currentModifier == WaveModifier.liarNumbers) {
+      const LiarEngine(liarRatio: 0.05)
+          .applyLies(_board, seed: _wavesRng.nextInt(1 << 31));
+    }
+
+    _minesPlaced = true;
+    _status = GameStatus.playing;
+    explodedCell = null;
+    lastRevealed = const [];
+    boardGeneration++;
+
+    // Foothold: revelar el centro seguro para arrancar la oleada.
+    _revealSilently(cr, cc);
+    // Niebla parcial: fijar el foco inicial en el centro.
+    if (_wavePartialFog) _setFogFocus(cr, cc);
+    // Radar pasivo: marca 1 mina al azar (§2.5).
+    if (_radar) _flagRandomMine();
+    // Visión (una vez): revela una zona 3×3 segura adicional.
+    if (_vision) {
+      _revealSafeZone();
+      _vision = false;
+    }
+  }
+
+  /// Revela una celda sin disparar la lógica de victoria/derrota (para el
+  /// foothold y la Visión). La celda debe ser segura.
+  void _revealSilently(int row, int col) {
+    final result = _engine.reveal(_board, row, col);
+    if (result.isNoop || result.hitMine) return;
+    lastRevealed = result.revealed;
+    revealBatchId++;
+  }
+
+  /// Marca con bandera una mina oculta al azar (Radar).
+  void _flagRandomMine() {
+    final mines = [
+      for (final c in _board.cells)
+        if (c.hasMine && !c.isFlagged && !c.isRevealed) c,
+    ];
+    if (mines.isEmpty) return;
+    mines[_wavesRng.nextInt(mines.length)].isFlagged = true;
+  }
+
+  /// Busca una celda segura (0 minas alrededor, no revelada) y la revela con su
+  /// zona en cascada (Visión).
+  void _revealSafeZone() {
+    for (final c in _board.cells) {
+      if (!c.isRevealed && !c.hasMine && c.adjacentMines == 0) {
+        _revealSilently(c.row, c.col);
+        return;
+      }
+    }
+  }
+
+  /// Oleada superada: suma puntaje y ofrece 3 mejoras (§2.5).
+  void _wavesWaveComplete() {
+    final spec = _wavesEngine.boardFor(_wave);
+    _wavesScore += _wavesEngine.waveScore(_wave, spec.cells);
+    final available = WaveUpgrade.values.toSet();
+    if (_lives >= _wavesEngine.maxLives) available.remove(WaveUpgrade.extraLife);
+    _upgradeChoices = _wavesEngine.rollUpgrades(_wavesRng, available: available);
+    _awaitingUpgrade = true;
+    _persistWaves();
+    notifyListeners();
+  }
+
+  /// Aplica la mejora elegida y avanza a la siguiente oleada.
+  void chooseUpgrade(WaveUpgrade upgrade) {
+    if (!_awaitingUpgrade) return;
+    switch (upgrade) {
+      case WaveUpgrade.extraLife:
+        _lives = (_lives + 1).clamp(0, _wavesEngine.maxLives);
+      case WaveUpgrade.shield:
+      case WaveUpgrade.itemCharge:
+        _shield++;
+      case WaveUpgrade.radar:
+        _radar = true;
+      case WaveUpgrade.vision:
+        _vision = true;
+    }
+    _wave++;
+    _awaitingUpgrade = false;
+    _upgradeChoices = const [];
+    _startWaveBoard();
+    _persistWaves();
+    notifyListeners();
+  }
+
+  /// Impacto de mina en Oleadas: el Escudo lo absorbe; si no, cuesta una vida.
+  /// Sin vidas → game over. La mina tocada se neutraliza (queda marcada).
+  void _wavesMineHit(Cell? mine) {
+    if (mine != null) {
+      mine.isRevealed = false;
+      mine.isFlagged = true; // mina conocida (neutralizada)
+    }
+    if (_shield > 0) {
+      _shield--;
+    } else {
+      _lives--;
+      if (_lives <= 0) {
+        explodedCell = mine;
+        _engine.revealAllMines(_board);
+        _status = GameStatus.lost;
+        final prev = _records.wavesBestScore;
+        _records.recordWaves(_wavesScore);
+        _isNewRecord = _wavesScore > prev;
+        _savegameRepo?.clearWaves();
+        notifyListeners();
+        return;
+      }
+    }
+    _persistWaves();
+    notifyListeners();
+  }
+
+  void _persistWaves() {
+    _savegameRepo?.saveWaves({
+      'wave': _wave,
+      'lives': _lives,
+      'score': _wavesScore,
+      'shield': _shield,
+      'radar': _radar,
+      'vision': _vision,
+      // Estado exacto del tablero en curso (§6.2).
+      'board': _board.toMap(),
+      'modifier': _currentModifier?.name,
+      'delayedDone': _delayedDone,
+      if (_awaitingUpgrade)
+        'upgradeChoices': [for (final u in _upgradeChoices) u.name],
+    });
   }
 
   /// Blitz: prepara el siguiente tablero sin detener la partida ni el reloj.
@@ -196,6 +498,7 @@ class GameProvider extends ChangeNotifier {
   bool get _tapReveals => !_flagMode && !_invertControls;
 
   void onTap(int row, int col) {
+    if (_awaitingUpgrade) return; // Oleadas: eligiendo mejora
     // Mentiroso: con el Escáner activo, el toque escanea en vez de revelar.
     if (isLiar && _scannerMode) {
       _scan(row, col);
@@ -209,6 +512,7 @@ class GameProvider extends ChangeNotifier {
   }
 
   void onLongPress(int row, int col) {
+    if (_awaitingUpgrade) return;
     // El long-press hace lo contrario del tap.
     if (_tapReveals) {
       _toggleFlag(row, col);
@@ -218,10 +522,11 @@ class GameProvider extends ChangeNotifier {
   }
 
   void onDoubleTap(int row, int col) {
+    if (_awaitingUpgrade) return;
     if (_status != GameStatus.playing) return;
     final result = _engine.chord(_board, row, col);
     if (result.isNoop) return;
-    if (isFog) _setFogFocus(row, col);
+    if (fogActive) _setFogFocus(row, col);
     _applyReveal(result.revealed, result.hitMine);
   }
 
@@ -288,7 +593,7 @@ class GameProvider extends ChangeNotifier {
 
     final result = _engine.reveal(_board, row, col);
     if (result.isNoop) return;
-    if (isFog) _setFogFocus(row, col);
+    if (fogActive) _setFogFocus(row, col);
     _applyReveal(result.revealed, result.hitMine);
   }
 
@@ -304,7 +609,12 @@ class GameProvider extends ChangeNotifier {
     revealBatchId++;
 
     if (hitMine) {
-      explodedCell = revealed.isNotEmpty ? revealed.last : null;
+      final mineCell = revealed.isNotEmpty ? revealed.last : null;
+      if (isWaves) {
+        _wavesMineHit(mineCell);
+        return;
+      }
+      explodedCell = mineCell;
       _engine.revealAllMines(_board);
       if (isBlitz) _scoring.breakCombo();
       _finish(GameStatus.lost);
@@ -320,10 +630,46 @@ class GameProvider extends ChangeNotifier {
         _blitzAdvance();
         return;
       }
+      if (isWaves) {
+        _wavesWaveComplete();
+        return;
+      }
       _finish(GameStatus.won);
       return;
     }
+
+    // Oleadas: modificador "minas con retardo" — a mitad de la oleada aparecen
+    // 3 minas nuevas con aviso (§2.5).
+    if (isWaves) {
+      _maybeInjectDelayedMines();
+      _persistWaves(); // guardar el tablero exacto tras cada revelado (§6.2)
+    }
+
     notifyListeners();
+  }
+
+  /// Inyecta minas con retardo cuando ya se reveló la mitad de las celdas
+  /// seguras de la oleada. Solo una vez por oleada.
+  void _maybeInjectDelayedMines() {
+    if (!_delayedPending || _delayedDone) return;
+    final safeTotal = _board.cells.where((c) => !c.hasMine).length;
+    final safeRevealed =
+        _board.cells.where((c) => c.isRevealed && !c.hasMine).length;
+    if (safeRevealed * 2 < safeTotal) return; // aún no es la mitad
+
+    _delayedDone = true;
+    _wavesEngine.injectMines(_board, _wavesEngine.delayedMinesCount, _wavesRng);
+    _flashWaveWarning();
+  }
+
+  /// Muestra el aviso transitorio de "minas nuevas" ~1.5s y notifica al expirar.
+  void _flashWaveWarning() {
+    _waveWarningUntilEpochMs =
+        DateTime.now().millisecondsSinceEpoch + 1500;
+    _warningTimer?.cancel();
+    _warningTimer = Timer(const Duration(milliseconds: 1500), () {
+      notifyListeners();
+    });
   }
 
   /// Blitz: tablero completado → bono de tiempo, +1 al marcador y tablero nuevo.
@@ -339,6 +685,7 @@ class GameProvider extends ChangeNotifier {
     if (isTerminal || _status == GameStatus.paused) return;
     // Permitir marcar antes del primer revelado (aún sin minas colocadas).
     _engine.toggleFlag(_board, row, col);
+    if (isWaves) _persistWaves(); // banderas también en el savegame exacto
     notifyListeners();
   }
 
@@ -466,6 +813,7 @@ class GameProvider extends ChangeNotifier {
   @override
   void dispose() {
     _stopTicker();
+    _warningTimer?.cancel();
     elapsed.dispose();
     super.dispose();
   }

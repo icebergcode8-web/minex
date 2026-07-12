@@ -67,7 +67,7 @@ const List<ModeInfo> kModeCatalog = [
       mode: GameMode.waves,
       emoji: '🌊',
       icon: Icons.waves_rounded,
-      available: false),
+      available: true),
   ModeInfo(
       mode: GameMode.tower,
       emoji: '🧊',
