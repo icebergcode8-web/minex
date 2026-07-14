@@ -40,6 +40,7 @@
 - [ ] `AdService` (carga, retry con backoff, dispose, banner por pantalla)
 - [ ] `AdsProvider` con **frequency capping** (§7.2) — clase pura con clock inyectable + su test
 - [ ] Rewarded "Revivir" + "Doblar monedas"; interstitial al volver al menú; banner en Home/ModeSelect
+  - [ ] Rewarded **"Revivir con escudo"** en el modo Torre 3D (§2.6): al tocar una mina, ver anuncio → la capa se conserva y se continúa (1 vez por partida).
 - [ ] Consentimiento **UMP** antes de inicializar ads
 
 ## 🕹️ Fase 4 — Modos nuevos (en este orden de complejidad)
@@ -57,9 +58,9 @@
 - [x] **Reto Diario** (`DailyEngine` puro: seed `yyyyMMdd`, rotación de modo lun→dom, fallback torre→clásico hasta F6) + `DailyRepository` (dailyBox) + `DailyProvider` (reloj inyectable) con **racha** y recompensas crecientes (cofre al día 7). `DailyChallengeScreen` + tarjeta y racha 🔥 en Home. Con tests. _Reintento vía rewarded ad → Fase 3 (Ads)._
   - _Pendiente menor: desbloqueo progresivo de modos (§8.3: Mentiroso 5 victorias / 3D 10) — hoy todos accesibles._
 
-## 🧊 Fase 6 — Modo 3D (update 1.1)
-- [ ] `tower_engine.dart` (conteo con 9 vecinas incluyendo celda inferior) + su unit test
-- [ ] Render 2.5D con `Matrix4`/`Transform`, capas semitransparentes, rotación por gesto
+## 🧊 Fase 6 — Modo 3D (update 1.1) ✅
+- [x] **`tower_engine.dart`** puro + modelo `Tower` (capas apiladas, capa activa): genera N capas 8×8 con centro seguro y calcula la adyacencia 3D — **8 vecinas de la capa + la celda directamente debajo** (9 vecinas), marcando `Cell.minedBelow`. `towerConfig` 3/5/7 capas (Fácil/Medio/Difícil). Con unit tests (adyacencia con celda inferior, determinismo, centro seguro).
+- [x] **Render 2.5D** (`TowerBoardWidget`) con `Transform`/`Matrix4` (perspectiva + `rotateX` isométrico), capas inferiores semitransparentes y atenuadas, **solo la superior interactiva**, **punto indicador de "mina debajo"**, y **rotación de dos dedos ±30°** (cosmética). Integrado en `GameProvider` (avance de capa al completar, victoria al despejar la torre, derrota al tocar mina, HUD "capa X/N" + reloj) y emite `GameOutcome` (monedas/logros). El Reto Diario del domingo ya usa la Torre real (5 capas). Con tests de flujo (provider) + smoke.
 
 ## 🚀 Fase 7 — Release
 - [ ] QA en Android gama baja (60fps en Experto, `--profile`), modo avión, kill+reabrir restaura Oleadas

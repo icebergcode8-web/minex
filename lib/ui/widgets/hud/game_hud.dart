@@ -56,6 +56,41 @@ class GameTopHud extends StatelessWidget {
       );
     }
 
+    if (gp.isTower) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            _HudButton(icon: Icons.pause, onTap: onPause),
+            const Spacer(),
+            _HudChip(
+              icon: Icons.layers_rounded,
+              color: palette.primary,
+              label: '${gp.towerLayer}/${gp.towerLayerCount}',
+            ),
+            const SizedBox(width: 8),
+            _HudChip(
+              icon: Icons.flag,
+              color: palette.danger,
+              label: '${gp.minesRemaining}',
+            ),
+            const SizedBox(width: 8),
+            ValueListenableBuilder<Duration>(
+              valueListenable: gp.elapsed,
+              builder: (_, value, _) => _HudChip(
+                icon: Icons.timer_outlined,
+                color: palette.primary,
+                label: formatClock(value),
+                monospace: true,
+              ),
+            ),
+            const Spacer(),
+            const SizedBox(width: 40),
+          ],
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(

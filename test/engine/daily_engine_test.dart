@@ -49,11 +49,12 @@ void main() {
     expect(s1.mode, s2.mode);
   });
 
-  test('domingo (torre) hace fallback a clásico experto hasta la Fase 6', () {
+  test('domingo es Torre 3D (5 capas)', () {
     final sunday = DateTime(2024, 1, 7);
     final spec = engine.specFor(sunday);
     expect(spec.mode, GameMode.tower);
-    expect(spec.config.mode, GameMode.classic);
-    expect(spec.difficulty, Difficulty.expert);
+    expect(spec.config.mode, GameMode.tower);
+    expect(spec.config.layers, 5);
+    expect(spec.difficulty, Difficulty.medium);
   });
 }

@@ -200,5 +200,17 @@
   "resultCoins": "+{coins} monedas",
   "@resultCoins": {
     "placeholders": { "coins": { "type": "int" } }
+  },
+
+  "towerLayersLabel": "{count} capas · 8×8",
+  "@towerLayersLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "towerLayerHud": "Capa {current}/{total}",
+  "@towerLayerHud": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
   }
 }

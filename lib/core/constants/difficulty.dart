@@ -86,6 +86,38 @@ GameConfig wavesConfig() => const GameConfig(
       lives: 3,
     );
 
+/// Capas de la Torre 3D por dificultad (plan §2.6): 3 / 5 / 7 tableros 8×8.
+const Map<Difficulty, int> kTowerLayers = {
+  Difficulty.easy: 3,
+  Difficulty.medium: 5,
+  Difficulty.hard: 7,
+};
+
+/// Dificultades disponibles para la Torre 3D (§2.6): definen el nº de capas.
+const List<Difficulty> kTowerDifficulties = [
+  Difficulty.easy,
+  Difficulty.medium,
+  Difficulty.hard,
+];
+
+/// Minas por capa en la Torre (8×8 = 64 → ~15.6%, como Fácil).
+const int kTowerMinesPerLayer = 10;
+
+/// Config del modo Torre 3D (plan §2.6). Cada capa es 8×8 con
+/// [kTowerMinesPerLayer] minas; el nº de capas lo fija la dificultad.
+GameConfig towerConfig(Difficulty difficulty, {int? seed}) {
+  assert(kTowerDifficulties.contains(difficulty),
+      'La Torre usa 3/5/7 capas (Fácil/Medio/Difícil)');
+  return GameConfig(
+    mode: GameMode.tower,
+    rows: 8,
+    cols: 8,
+    mines: kTowerMinesPerLayer,
+    layers: kTowerLayers[difficulty]!,
+    seed: seed,
+  );
+}
+
 /// Dificultades disponibles para Mentiroso (plan §2.4): Medio en adelante.
 const List<Difficulty> kLiarDifficulties = [
   Difficulty.medium,

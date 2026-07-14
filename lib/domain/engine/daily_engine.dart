@@ -98,10 +98,10 @@ class DailyEngine {
           difficulty: Difficulty.easy,
           mode: GameMode.waves,
         ),
-      // Torre (domingo): fallback a clásico experto hasta la Fase 6.
+      // Torre 3D (domingo, §2.6): 5 capas.
       GameMode.tower || GameMode.daily => DailySpec(
-          config: classicConfig(Difficulty.expert, seed: seed),
-          difficulty: Difficulty.expert,
+          config: towerConfig(Difficulty.medium, seed: seed),
+          difficulty: Difficulty.medium,
           mode: GameMode.tower,
         ),
     };

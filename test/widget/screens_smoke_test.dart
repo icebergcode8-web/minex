@@ -155,6 +155,26 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('GameScreen de la Torre 3D pinta capas y no rompe con un toque',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        GameScreen(
+          args: GameArgs(
+            config: towerConfig(Difficulty.easy, seed: 7),
+            difficulty: Difficulty.easy,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    // HUD de acción presente y sin excepción tras un toque en el tablero.
+    expect(find.text('Revelar'), findsOneWidget);
+    await tester.tapAt(tester.getCenter(find.byType(GameScreen)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('el botón de pausa no rompe la app', (tester) async {
     await tester.pumpWidget(
       _wrap(

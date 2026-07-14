@@ -187,5 +187,17 @@
   "resultCoins": "+{coins} coins",
   "@resultCoins": {
     "placeholders": { "coins": { "type": "int" } }
+  },
+
+  "towerLayersLabel": "{count} layers · 8×8",
+  "@towerLayersLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "towerLayerHud": "Layer {current}/{total}",
+  "@towerLayerHud": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
   }
 }

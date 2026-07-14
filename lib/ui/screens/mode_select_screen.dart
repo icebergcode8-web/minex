@@ -63,6 +63,9 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
             difficulty: Difficulty.easy, // no aplica; récord propio
           ),
         );
+      case GameMode.tower:
+        // Torre 3D: la dificultad define el nº de capas (§2.6).
+        nav.pushNamed(Routes.difficulty, arguments: GameMode.tower);
       case GameMode.classic:
       default:
         nav.pushNamed(Routes.difficulty, arguments: GameMode.classic);

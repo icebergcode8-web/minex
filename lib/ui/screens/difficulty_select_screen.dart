@@ -37,22 +37,36 @@ class DifficultySelectScreen extends StatelessWidget {
       };
 
   bool get _isLiar => mode == GameMode.liar;
+  bool get _isTower => mode == GameMode.tower;
 
-  /// Dificultades ofrecidas según el modo. Mentiroso solo Medio+ (§2.4).
-  List<Difficulty> get _order =>
-      _isLiar ? kLiarDifficulties : _classicOrder;
+  /// Dificultades ofrecidas según el modo. Mentiroso solo Medio+ (§2.4);
+  /// Torre 3D usa 3/5/7 capas (Fácil/Medio/Difícil, §2.6).
+  List<Difficulty> get _order => _isLiar
+      ? kLiarDifficulties
+      : _isTower
+          ? kTowerDifficulties
+          : _classicOrder;
 
   GameConfig _configFor(Difficulty d) => switch (mode) {
         GameMode.fog => fogConfig(d),
         GameMode.liar => liarConfig(d),
+        GameMode.tower => towerConfig(d),
         _ => classicConfig(d),
       };
 
   String _title(AppLocalizations l) => switch (mode) {
         GameMode.fog => l.modeFog,
         GameMode.liar => l.modeLiar,
+        GameMode.tower => l.modeTower,
         _ => l.classicMode,
       };
+
+  /// Subtítulo de cada tarjeta: resumen del tablero, o nº de capas en la Torre.
+  String _subtitle(AppLocalizations l, Difficulty d) {
+    if (_isTower) return l.towerLayersLabel(kTowerLayers[d]!);
+    final p = kDifficultyPresets[d]!;
+    return l.boardSummary(p.rows, p.cols, p.mines);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +83,7 @@ class DifficultySelectScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _DifficultyCard(
                   label: _label(l, d),
-                  preset: kDifficultyPresets[d]!,
+                  subtitle: _subtitle(l, d),
                   // Solo el Clásico persiste récords por dificultad (Fase 5).
                   bestTimeMs: mode == GameMode.classic
                       ? records.bestTimeMs(d)
@@ -102,13 +116,13 @@ class DifficultySelectScreen extends StatelessWidget {
 class _DifficultyCard extends StatelessWidget {
   const _DifficultyCard({
     required this.label,
-    required this.preset,
+    required this.subtitle,
     required this.bestTimeMs,
     required this.onTap,
   });
 
   final String label;
-  final DifficultyPreset preset;
+  final String subtitle;
   final int? bestTimeMs;
   final VoidCallback onTap;
 
@@ -131,7 +145,7 @@ class _DifficultyCard extends StatelessWidget {
                   )),
               const SizedBox(height: 4),
               Text(
-                l.boardSummary(preset.rows, preset.cols, preset.mines),
+                subtitle,
                 style: TextStyle(color: palette.textMuted),
               ),
             ],

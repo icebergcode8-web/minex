@@ -72,5 +72,5 @@ const List<ModeInfo> kModeCatalog = [
       mode: GameMode.tower,
       emoji: '🧊',
       icon: Icons.view_in_ar_rounded,
-      available: false),
+      available: true),
 ];

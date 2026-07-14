@@ -558,4 +558,63 @@ void main() {
       });
     });
   });
+
+  group('Torre 3D (§2.6)', () {
+    GameProvider newTower() => GameProvider(
+          config: towerConfig(Difficulty.easy, seed: 123), // Fácil = 3 capas
+          difficulty: Difficulty.easy,
+          records: FakeRecordsRepository(),
+        );
+
+    /// Revela todas las celdas seguras de la capa activa actual.
+    void clearActiveLayer(GameProvider gp) {
+      final board = gp.board;
+      for (final c in board.cells) {
+        if (!c.hasMine && !c.isRevealed && gp.status == GameStatus.playing) {
+          gp.onTap(c.row, c.col);
+        }
+      }
+    }
+
+    test('arranca en la cima con el centro revelado y jugando', () {
+      final gp = newTower();
+      expect(gp.isTower, isTrue);
+      expect(gp.tower, isNotNull);
+      expect(gp.towerLayerCount, 3);
+      expect(gp.towerLayer, 1); // capa 1/3 = cima
+      expect(gp.status, GameStatus.playing);
+      expect(gp.board.cellAt(4, 4).isRevealed, isTrue); // foothold central
+      gp.dispose();
+    });
+
+    test('completar una capa desciende a la siguiente', () {
+      final gp = newTower();
+      final startActive = gp.tower!.activeLayer;
+      clearActiveLayer(gp);
+      // Aún jugando (quedan capas) y la capa activa descendió.
+      expect(gp.status, GameStatus.playing);
+      expect(gp.tower!.activeLayer, startActive - 1);
+      expect(gp.towerLayer, 2); // capa 2/3
+      gp.dispose();
+    });
+
+    test('completar todas las capas gana la torre', () {
+      final gp = newTower();
+      var guard = 0;
+      while (gp.status == GameStatus.playing && guard++ < 10) {
+        clearActiveLayer(gp);
+      }
+      expect(gp.status, GameStatus.won);
+      gp.dispose();
+    });
+
+    test('tocar una mina termina la partida (derrota)', () {
+      final gp = newTower();
+      final mine = gp.board.cells.firstWhere((c) => c.hasMine);
+      gp.onTap(mine.row, mine.col);
+      expect(gp.status, GameStatus.lost);
+      expect(gp.explodedCell, isNotNull);
+      gp.dispose();
+    });
+  });
 }

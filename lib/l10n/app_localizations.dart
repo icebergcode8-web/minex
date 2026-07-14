@@ -889,6 +889,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'+{coins} monedas'**
   String resultCoins(int coins);
+
+  /// No description provided for @towerLayersLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} capas · 8×8'**
+  String towerLayersLabel(int count);
+
+  /// No description provided for @towerLayerHud.
+  ///
+  /// In es, this message translates to:
+  /// **'Capa {current}/{total}'**
+  String towerLayerHud(int current, int total);
 }
 
 class _AppLocalizationsDelegate

@@ -427,4 +427,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String resultCoins(int coins) {
     return '+$coins coins';
   }
+
+  @override
+  String towerLayersLabel(int count) {
+    return '$count layers · 8×8';
+  }
+
+  @override
+  String towerLayerHud(int current, int total) {
+    return 'Layer $current/$total';
+  }
 }

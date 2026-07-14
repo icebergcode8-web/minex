@@ -20,6 +20,7 @@ import '../overlays/pause_overlay.dart';
 import '../overlays/result_overlay.dart';
 import '../overlays/wave_upgrade_overlay.dart';
 import '../widgets/board/board_widget.dart';
+import '../widgets/board/tower_board_widget.dart';
 import '../widgets/common/app_background.dart';
 import '../widgets/hud/game_hud.dart';
 
@@ -147,10 +148,12 @@ class _GameView extends StatelessWidget {
                 children: [
                   GameTopHud(onPause: gp.pause),
                   const GameComboBar(),
-                  const Expanded(
+                  Expanded(
                     child: Padding(
-                      padding: EdgeInsets.all(8),
-                      child: BoardWidget(),
+                      padding: const EdgeInsets.all(8),
+                      child: gp.isTower
+                          ? const TowerBoardWidget()
+                          : const BoardWidget(),
                     ),
                   ),
                   const GameActionBar(),

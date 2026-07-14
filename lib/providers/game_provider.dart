@@ -10,6 +10,7 @@ import '../domain/engine/board_generator.dart';
 import '../domain/engine/liar_engine.dart';
 import '../domain/engine/minesweeper_engine.dart';
 import '../domain/engine/scoring.dart';
+import '../domain/engine/tower_engine.dart';
 import '../domain/engine/waves_engine.dart';
 import '../domain/models/board.dart';
 import '../domain/models/cell.dart';
@@ -17,6 +18,7 @@ import '../domain/models/game_config.dart';
 import '../domain/models/game_mode.dart';
 import '../domain/models/game_outcome.dart';
 import '../domain/models/game_status.dart';
+import '../domain/models/tower.dart';
 import '../domain/models/wave_modifier.dart';
 
 /// Estado de la partida actual (plan §6.3). **No contiene lógica de juego**:
@@ -55,6 +57,8 @@ class GameProvider extends ChangeNotifier {
         _engine = engine {
     if (isWaves) {
       _startWavesRun(resume: resumeWaves);
+    } else if (isTower) {
+      _startTower();
     } else {
       _startNewBoard();
     }
@@ -103,11 +107,21 @@ class GameProvider extends ChangeNotifier {
   bool get isFog => config.mode == GameMode.fog;
   bool get isLiar => config.mode == GameMode.liar;
   bool get isWaves => config.mode == GameMode.waves;
+  bool get isTower => config.mode == GameMode.tower;
   bool get isClassicScored => config.mode == GameMode.classic;
 
   static const _liarEngine = LiarEngine();
   static const _wavesEngine = WavesEngine();
+  static const _towerEngine = TowerEngine();
   final Random _wavesRng = Random();
+
+  // ── Torre 3D (plan §2.6) ───────────────────────────────────────────
+  Tower? _tower;
+  Tower? get tower => _tower;
+
+  /// Capa activa contada desde arriba (1 = cima), para el HUD.
+  int get towerLayer => _tower?.displayLayer ?? 1;
+  int get towerLayerCount => _tower?.layerCount ?? config.layers;
 
   // ── Estado observable ──────────────────────────────────────────────
   late Board _board;
@@ -260,10 +274,64 @@ class GameProvider extends ChangeNotifier {
   void restart() {
     if (isWaves) {
       _startWavesRun(resume: false); // reiniciar = nueva run desde la oleada 1
+    } else if (isTower) {
+      _startTower();
     } else {
       _startNewBoard();
     }
     notifyListeners();
+  }
+
+  // ── Torre 3D (plan §2.6) ───────────────────────────────────────────
+  /// Genera la torre y activa la capa superior. Las minas van pre-colocadas
+  /// (como Oleadas), con centro seguro por capa para arrancar.
+  void _startTower() {
+    _tower = _towerEngine.generate(
+      layers: config.layers,
+      rows: config.rows,
+      cols: config.cols,
+      minesPerLayer: config.mines,
+      seed: config.seed,
+    );
+    _board = _tower!.active;
+    _minesPlaced = true;
+    _isNewRecord = false;
+    _usedAnyFlag = false;
+    explodedCell = null;
+    lastRevealed = const [];
+    boardGeneration++;
+    _beginPlaying();
+    _revealTowerFoothold();
+  }
+
+  /// Revela el centro seguro de la capa activa como punto de partida.
+  void _revealTowerFoothold() {
+    final cr = _board.rows ~/ 2;
+    final cc = _board.cols ~/ 2;
+    if (!_board.cellAt(cr, cc).isRevealed) _revealSilently(cr, cc);
+  }
+
+  /// Capa superada: si es la del fondo, la torre está completa (victoria); si
+  /// no, desciende y la siguiente capa se vuelve jugable (plan §2.6).
+  void _towerLayerComplete() {
+    if (_tower!.isBottomActive) {
+      _finish(GameStatus.won);
+      return;
+    }
+    _tower!.activeLayer--;
+    _board = _tower!.active;
+    explodedCell = null;
+    lastRevealed = const [];
+    boardGeneration++;
+    _revealTowerFoothold();
+    notifyListeners();
+  }
+
+  /// Tocar una mina en la Torre derrumba la capa y termina la partida (§2.6).
+  void _towerMineHit(Cell? mine) {
+    explodedCell = mine;
+    _engine.revealAllMines(_board);
+    _finish(GameStatus.lost);
   }
 
   // ── Oleadas (plan §2.5) ────────────────────────────────────────────
@@ -643,6 +711,10 @@ class GameProvider extends ChangeNotifier {
         _wavesMineHit(mineCell);
         return;
       }
+      if (isTower) {
+        _towerMineHit(mineCell);
+        return;
+      }
       explodedCell = mineCell;
       _engine.revealAllMines(_board);
       if (isBlitz) _scoring.breakCombo();
@@ -661,6 +733,10 @@ class GameProvider extends ChangeNotifier {
       }
       if (isWaves) {
         _wavesWaveComplete();
+        return;
+      }
+      if (isTower) {
+        _towerLayerComplete();
         return;
       }
       _finish(GameStatus.won);
